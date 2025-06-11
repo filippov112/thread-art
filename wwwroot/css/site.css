@@ -1,0 +1,236 @@
+/* Основные стили */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f9;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+.container {
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 800px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 1.5rem;
+  transition: color 0.3s ease;
+}
+
+.theme-toggle {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+}
+#themeToggle {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+#themeToggle:hover {
+  transform: scale(1.1);
+}
+
+/* Стили для формы */
+.form-group {
+  margin-bottom: 1rem;
+}
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #555;
+  font-weight: bold;
+}
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group input[type="file"] {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+.form-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.form-row .form-group {
+  flex: 1;
+}
+
+button[type="submit"] {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+button[type="submit"]:hover {
+  background-color: #45a049;
+}
+
+/* Стили для кнопки возврата */
+.back-button {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #6c757d;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+.back-button:hover {
+  background-color: #5a6268;
+}
+
+
+
+/* Стили для списка маршрута */
+.route-container {
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+.route-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+.route-list li {
+  padding: 0.5rem;
+  border-bottom: 1px solid #ddd;
+  transition: background-color 0.3s ease;
+}
+.route-list li:last-child {
+  border-bottom: none;
+}
+.route-list li:hover {
+  background-color: #f1f1f1;
+}
+
+
+/* Стили для прогресс-бара */
+#progressBar {
+  width: 100%;
+  background-color: #f3f3f3;
+  border-radius: 5px;
+  margin-top: 1.5rem;
+  overflow: hidden;
+}
+#progress {
+  width: 0%;
+  height: 30px;
+  background-color: #4caf50;
+  transition: width 0.3s ease;
+}
+
+
+/* Стили для кнопки возврата */
+.back-button {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #6c757d;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.back-button:hover {
+  background-color: #5a6268;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+.back-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+
+/* Сетка для изображений */
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.image-container {
+  text-align: center;
+}
+.result-image {
+  width: 100%; 
+  height: 300px; 
+  object-fit: contain; 
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background:white;
+}
+
+
+/* Стили для кнопок скачивания */
+.download-links {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+}
+.download-button {
+  background-color: #4caf50;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  text-decoration: none;
+  border-radius: 5px;
+  text-align: center;
+  transition: background-color 0.3s ease;
+}
+.download-button:hover {
+  background-color: #45a049;
+}
+
+
+/* Темная тема */
+body.dark .container {
+  background-color: #444;
+  color: #fff;
+}
+body.dark h2, body.dark label {
+  color: #fff;
+}
+body.dark .route-list li {
+  border-bottom: 1px solid #666;
+}
+body.dark {
+  background-color: #333;
+  color: #fff;
+}
+body.dark .route-container {
+  background-color: #555;
+  color: #fff;
+}
+body.dark .route-list li:hover {
+  background-color: #666;
+}
+body.dark .download-button {
+  background-color: #45a049;
+}

@@ -1,0 +1,44 @@
+@model ImageModel
+
+@{
+    ViewData["Title"] = "Результат расчета";
+}
+
+<body>
+    <div class="container">
+        <div class="theme-toggle">
+            <button id="themeToggle">🌙</button>
+        </div>
+        <a href="/Image/Index" class="back-button">← Вернуться к форме</a>
+        <h2>Результаты обработки</h2>
+        <div class="image-grid">
+            <div class="image-container">
+                <h5>Исходное изображение</h5>
+            </div>
+            <div class="image-container">
+                <h5>Результирующее изображение</h5>
+            </div>
+        </div>
+        <div class="image-grid">
+            <div class="image-container">
+                <img src="@Model.OriginalImagePath" alt="Original Image" class="result-image" />
+            </div>
+            <div class="image-container">
+                <img src="@Model.ResultImagePath" alt="Result Image" class="result-image" />
+            </div>
+        </div>
+        <h2>Маршрут</h2>
+        <div class="route-container">
+            <ul class="route-list">
+                @foreach (var point in Model.Route)
+                {
+                    <li>@point</li>
+                }
+            </ul>
+        </div>
+        <div class="download-links">
+            <a href="@Model.ResultImagePath" download class="download-button">Скачать результат (изображение)</a>
+            <a href="@Model.RouteFilePath" download class="download-button">Скачать маршрут (текстовый файл)</a>
+        </div>
+    </div>
+</body>

@@ -1,0 +1,67 @@
+@model ImageModel
+@{
+    ViewData["Title"] = "Загрузка изображения";
+}
+
+<body>
+    <div class="container">
+        <div class="theme-toggle">
+            <button id="themeToggle">🌙</button>
+        </div>
+        <h2>Загрузите изображение</h2>
+        <form asp-action="UploadImage" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label asp-for="ImageFile">Изображение:</label>
+                <input asp-for="ImageFile" type="file" />
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label asp-for="Parameters.SmallWidth">Ширина расчетной матрицы:</label>
+                    <input asp-for="Parameters.SmallWidth" type="number" />
+                </div>
+                <div class="form-group">
+                    <label asp-for="Parameters.SmallHeight">Высота расчетной матрицы:</label>
+                    <input asp-for="Parameters.SmallHeight" type="number" />
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label asp-for="Parameters.LargeWidth">Ширина матрицы отрисовки:</label>
+                    <input asp-for="Parameters.LargeWidth" type="number" />
+                </div>
+                <div class="form-group">
+                    <label asp-for="Parameters.LargeHeight">Высота матрицы отрисовки:</label>
+                    <input asp-for="Parameters.LargeHeight" type="number" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Parameters.N">Число точек:</label>
+                <input asp-for="Parameters.N" type="number" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Parameters.NumSteps">Количество шагов:</label>
+                <input asp-for="Parameters.NumSteps" type="number" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Parameters.IsEllipseMatrix">Тип матрицы (эллипс):</label>
+                <input asp-for="Parameters.IsEllipseMatrix" type="checkbox" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Parameters.Dx">Толщина нити:</label>
+                <input asp-for="Parameters.Dx" type="number" />
+            </div>
+            <div class="form-group" id="progressBar">
+                <div id="progress"></div>
+            </div>
+            <button type="submit">Загрузить</button>
+        </form>   
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.11/signalr.min.js"></script>
+    <script src="~/js/signalr.js"></script>
+</body>
+
+
+
