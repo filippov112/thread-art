@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 public interface IImageService
 {
     Task<string> SaveImageAsync(IFormFile imageFile);
-    Task<(string ResultImagePath, string RouteFilePath, List<(int, int)> Route)> ProcessImageAsync(string imagePath, CalculationParameters parameters);
+    Task<(string ResultImagePath, string RouteFilePath, List<(int, int)> Route, List<(int, int)> GridPoints, List<string> FormattedRoute)> ProcessImageAsync(string imagePath, CalculationParameters parameters);
 }
 
 public class ImageService : IImageService
@@ -33,12 +33,12 @@ public class ImageService : IImageService
         return $"/images/{fileName}";
     }
 
-    public async Task<(string ResultImagePath, string RouteFilePath, List<(int, int)> Route)> ProcessImageAsync(string imagePath, CalculationParameters parameters)
+    public async Task<(string ResultImagePath, string RouteFilePath, List<(int, int)> Route, List<(int, int)> GridPoints, List<string> FormattedRoute)> ProcessImageAsync(string imagePath, CalculationParameters parameters)
     {
         var outputImagePath = Path.Combine("/images", "output.png");
         var routeFilePath = Path.Combine("/images", "route.txt");
 
-        processor.ProcessImage(
+        var (gridPoints, formattedRoute) = await processor.ProcessImage(
             _env.WebRootPath + imagePath,
             _env.WebRootPath + outputImagePath,
             _env.WebRootPath + routeFilePath,
@@ -55,6 +55,6 @@ public class ImageService : IImageService
                         .Select(parts => (int.Parse(parts[0]), int.Parse(parts[1])))
                         .ToList();
 
-        return (outputImagePath, routeFilePath, route);
+        return (outputImagePath, routeFilePath, route, gridPoints, formattedRoute);
     }
 }

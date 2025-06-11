@@ -252,3 +252,7 @@ __pycache__/
 appsettings.*.json
 *.swp
 *.swo
+
+wwwroot/images/
+project_content.txt
+project_structure.json

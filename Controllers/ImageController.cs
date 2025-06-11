@@ -29,6 +29,8 @@ public class ImageController : Controller
             model.ResultImagePath = result.ResultImagePath;
             model.RouteFilePath = result.RouteFilePath;
             model.Route = result.Route;
+            model.GridPoints = result.GridPoints;
+            model.FormattedRoute = result.FormattedRoute;
 
             return View("Result", model);
         }

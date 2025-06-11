@@ -6,6 +6,8 @@ public class ImageModel
     public string ResultImagePath { get; set; }
     public string RouteFilePath { get; set; }
     public List<(int, int)> Route { get; set; }
+    public List<string> FormattedRoute { get; set; } // Новое поле для форматированного маршрута
+    public List<(int, int)> GridPoints { get; set; } // Координаты точек сетки
 }
 
 public class CalculationParameters

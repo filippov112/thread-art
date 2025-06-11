@@ -27,18 +27,108 @@
                 <img src="@Model.ResultImagePath" alt="Result Image" class="result-image" />
             </div>
         </div>
-        <h2>Маршрут</h2>
+        
+        <h2>Маршрут в координатах сетки</h2>
         <div class="route-container">
-            <ul class="route-list">
-                @foreach (var point in Model.Route)
+            <div class="route-info">
+                @if (Model.Parameters.IsEllipseMatrix)
                 {
-                    <li>@point</li>
+                    <p><strong>Система координат:</strong> Эллиптическая сетка</p>
+                    <p><strong>Обозначения секторов:</strong> A (0°-90°), B (90°-180°), C (180°-270°), D (270°-360°)</p>
+                    <p><strong>Формат координат:</strong> [Сектор][Номер точки в секторе]</p>
                 }
-            </ul>
+                else
+                {
+                    <p><strong>Система координат:</strong> Прямоугольная сетка</p>
+                    <p><strong>Обозначения сторон:</strong> T (верх), B (низ), L (лево), R (право)</p>
+                    <p><strong>Формат координат:</strong> [Сторона][Номер точки на стороне]</p>
+                }
+            </div>
+            
+            <div class="route-display">
+                <h4>Форматированный маршрут:</h4>
+                <div class="formatted-route">
+                    @for (int i = 0; i < Model.FormattedRoute.Count; i++)
+                    {
+                        <span class="route-point">@Model.FormattedRoute[i]</span>
+                        @if (i < Model.FormattedRoute.Count - 1)
+                        {
+                            <span class="route-arrow">→</span>
+                        }
+                        @if ((i + 1) % 10 == 0 && i < Model.FormattedRoute.Count - 1)
+                        {
+                            <br />
+                        }
+                    }
+                </div>
+            </div>
+            
+            <details>
+                <summary>Показать координаты холста (для отладки)</summary>
+                <ul class="route-list">
+                    @foreach (var point in Model.Route)
+                    {
+                        <li>@point</li>
+                    }
+                </ul>
+            </details>
         </div>
+        
         <div class="download-links">
             <a href="@Model.ResultImagePath" download class="download-button">Скачать результат (изображение)</a>
             <a href="@Model.RouteFilePath" download class="download-button">Скачать маршрут (текстовый файл)</a>
         </div>
     </div>
+
+    <style>
+        .route-info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #007bff;
+        }
+
+        .route-info p {
+            margin: 5px 0;
+        }
+
+        .formatted-route {
+            background-color: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            line-height: 2;
+            font-family: 'Courier New', monospace;
+        }
+
+        .route-point {
+            background-color: #e9ecef;
+            padding: 3px 8px;
+            border-radius: 4px;
+            margin: 2px;
+            display: inline-block;
+            font-weight: bold;
+        }
+
+        .route-arrow {
+            color: #007bff;
+            font-weight: bold;
+            margin: 0 5px;
+        }
+
+        details {
+            margin-top: 20px;
+        }
+
+        summary {
+            cursor: pointer;
+            font-weight: bold;
+            color: #6c757d;
+        }
+
+        summary:hover {
+            color: #007bff;
+        }
+    </style>
 </body>
