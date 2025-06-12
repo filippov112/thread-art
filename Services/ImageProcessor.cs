@@ -4,6 +4,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Drawing;
 
 public class ImageProcessor
 {
@@ -167,7 +168,7 @@ public class ImageProcessor
         }
     }
 
-    private static void SaveRouteToFile(List<string> route, string filename)
+    private static void SaveRouteToFile(List<(int, int)> points, List<string> route, string filename, string filepixelname)
     {
         using (var writer = new StreamWriter(filename))
         {
@@ -176,44 +177,75 @@ public class ImageProcessor
                 writer.WriteLine(point);
             }
         }
-    }
-
-    private static void DrawCoordinateGrid(Image<Rgba32> image, int step = 50)
-    {
-        var font = SystemFonts.CreateFont("Arial", 12); 
-        var pen = Pens.Solid(Color.Gray, 1);
-        var brush = Brushes.Solid(Color.Gray);
-
-        for (int x = 0; x < image.Width; x += step)
+        using (var writer = new StreamWriter(filepixelname))
         {
-            image.Mutate(ctx => ctx.DrawLine(pen, new PointF(x, 0), new PointF(x, image.Height)));
-            if (x > 0)
+            foreach (var point in points)
             {
-                var text = x.ToString();
-                var textOptions = new RichTextOptions(font)
-                {
-                    Origin = new PointF(x, 5), 
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Top
-                };
-                image.Mutate(ctx => ctx.DrawText(textOptions, text, brush));
+                writer.WriteLine($"{point.Item1},{point.Item2}");
             }
         }
+    }
 
-        for (int y = 0; y < image.Height; y += step)
+    private void DrawCoordinateGrid(Image<Rgba32> image, List<(int, int)> gridPoints, 
+                              int width, int height, bool isEllipseMatrix)
+    {
+        var font = SystemFonts.CreateFont("Arial", 8);
+        var pen = Pens.Solid(Color.Gray, 1);
+        var brush = Brushes.Solid(Color.Black);
+        
+        // Цвета для разных секторов/сторон
+        var sectorColors = new Dictionary<char, Color>
         {
-            image.Mutate(ctx => ctx.DrawLine(pen, new PointF(0, y), new PointF(image.Width, y)));
-            if (y > 0)
+            {'A', Color.Red},
+            {'B', Color.Blue},
+            {'C', Color.Green},
+            {'D', Color.Purple},
+            {'T', Color.Red},
+            {'R', Color.Green},
+            {'L', Color.Purple}
+        };
+
+        int stepPoint = gridPoints.Count / 40;
+
+        for (int i = 0; i < gridPoints.Count; i++)
+        {
+            if (i % stepPoint > 0)
+                continue;
+            var point = gridPoints[i];
+            int padding = (int)(Math.Max(image.Width, image.Height) * 0.05f);
+            var scaledPoint = ScalePoint(point, (width, height), (image.Width - padding * 2, image.Height - padding * 2));
+            scaledPoint.Item1 += padding;
+            scaledPoint.Item2 += padding;
+            var coordinate = ConvertToGridCoordinate(point, gridPoints, width, height, isEllipseMatrix);
+            var sector = coordinate[0];
+            var color = sectorColors.ContainsKey(sector) ? sectorColors[sector] : Color.Black;
+            var markerBrush = new SolidBrush(color);
+
+            
+            
+            // Рисуем маркер точки (круг) - исправленная версия
+            image.Mutate(ctx => ctx.Fill(
+                new DrawingOptions { GraphicsOptions = new GraphicsOptions { Antialias = true } },
+                markerBrush,
+                new EllipsePolygon(new PointF(scaledPoint.Item2, scaledPoint.Item1), 3f)
+            ));
+
+            // Белая обводка
+            image.Mutate(ctx => ctx.Draw(
+                new DrawingOptions { GraphicsOptions = new GraphicsOptions { Antialias = true } },
+                Pens.Solid(Color.White, 2),
+                new EllipsePolygon(new PointF(scaledPoint.Item2, scaledPoint.Item1), 3f)
+            ));
+            var textPosition = new PointF(scaledPoint.Item2 + 3, scaledPoint.Item1);
+            
+            var textOptions = new RichTextOptions(font)
             {
-                var text = y.ToString();
-                var textOptions = new RichTextOptions(font)
-                {
-                    Origin = new PointF(5, y),
-                    HorizontalAlignment = HorizontalAlignment.Left,
-                    VerticalAlignment = VerticalAlignment.Center
-                };
-                image.Mutate(ctx => ctx.DrawText(textOptions, text, brush));
-            }
+                Origin = textPosition,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            
+            image.Mutate(ctx => ctx.DrawText(textOptions, coordinate, new SolidBrush(color)));
         }
     }
 
@@ -332,10 +364,15 @@ public class ImageProcessor
         return $"({y},{x})"; // Fallback для внутренних точек
     }
 
-    public async Task<(List<(int, int)> GridPoints, List<string> FormattedRoute)> ProcessImage(string inputImagePath, string outputImagePath, string routeFilePath, (int, int) smallSize, (int, int) largeSize, int n, int numSteps, bool isEllipseMatrix, int dx)
+    public async Task<(List<(int, int)> GridPoints, List<string> FormattedRoute)> ProcessImage(string inputImagePath, string outputImagePath, string routePixelFilePath, string routeFilePath, (int, int) smallSize, (int, int) largeSize, int n, int numSteps, bool isEllipseMatrix, int dx)
     {
         using (var baseImage = Image.Load<Rgba32>(inputImagePath))
-        using (var smallImage = baseImage.Clone(ctx => ctx.Resize(smallSize.Item1, smallSize.Item2)))
+        using (var smallImage = baseImage.Clone(ctx => ctx.Resize(new ResizeOptions
+        {
+            Size = new Size(smallSize.Item1, smallSize.Item2),
+            Mode = ResizeMode.Crop, // Обрезаем изображение вместо деформации
+            Position = AnchorPositionMode.Center // Центрируем изображение перед обрезкой
+        })))
         {
             var smallMatrix = new double[smallSize.Item2, smallSize.Item1];
             for (int y = 0; y < smallSize.Item1; y++)
@@ -367,17 +404,32 @@ public class ImageProcessor
                 ConvertToGridCoordinate(point, gridPoints, smallSize.Item1, smallSize.Item2, isEllipseMatrix))
                 .ToList();
 
-            using (var largeImage = new Image<Rgba32>(largeSize.Item1, largeSize.Item2))
+            int padding = (int)(Math.Max(largeSize.Item1, largeSize.Item2) * 0.05f);
+
+            using (
+                var largeImage = new Image<Rgba32>(
+                    largeSize.Item1 + padding * 2,
+                    largeSize.Item2 + padding * 2
+                )
+            )
             {
                 largeImage.Mutate(ctx => ctx.BackgroundColor(Color.White));
+
+                // Смещаем отрисовку маршрута с учетом полей
                 for (int i = 0; i < route.Count - 1; i++)
                 {
                     var startScaled = ScalePoint(route[i], smallSize, largeSize);
                     var endScaled = ScalePoint(route[i + 1], smallSize, largeSize);
-                    DrawLineOnLargeMatrix(startScaled, endScaled, largeImage, dx);
+
+                    // Добавляем отступы к координатам
+                    var startWithPadding = (startScaled.Item1 + padding, startScaled.Item2 + padding);
+                    var endWithPadding = (endScaled.Item1 + padding, endScaled.Item2 + padding);
+
+                    DrawLineOnLargeMatrix(startWithPadding, endWithPadding, largeImage, dx);
                 }
-                DrawCoordinateGrid(largeImage);
-                SaveRouteToFile(formattedRoute, routeFilePath);
+
+                DrawCoordinateGrid(largeImage, gridPoints, smallSize.Item1, smallSize.Item2, isEllipseMatrix);
+                SaveRouteToFile(route, formattedRoute, routeFilePath, routePixelFilePath);
                 largeImage.Save(outputImagePath);
             }
 

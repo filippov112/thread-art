@@ -5,7 +5,9 @@ body {
   margin: 0;
   padding: 0;
   display: flex;
+  min-height: 100vh;
   justify-content: center;
+  align-items: center;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 .container {
@@ -205,32 +207,5 @@ button[type="submit"]:hover {
   transition: background-color 0.3s ease;
 }
 .download-button:hover {
-  background-color: #45a049;
-}
-
-
-/* Темная тема */
-body.dark .container {
-  background-color: #444;
-  color: #fff;
-}
-body.dark h2, body.dark label {
-  color: #fff;
-}
-body.dark .route-list li {
-  border-bottom: 1px solid #666;
-}
-body.dark {
-  background-color: #333;
-  color: #fff;
-}
-body.dark .route-container {
-  background-color: #555;
-  color: #fff;
-}
-body.dark .route-list li:hover {
-  background-color: #666;
-}
-body.dark .download-button {
   background-color: #45a049;
 }

@@ -1,4 +1,4 @@
-namespace MyRingString.Models;
+namespace threadart.Models;
 
 public class ErrorViewModel
 {

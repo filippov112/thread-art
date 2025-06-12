@@ -6,9 +6,6 @@
 
 <body>
     <div class="container">
-        <div class="theme-toggle">
-            <button id="themeToggle">🌙</button>
-        </div>
         <a href="/Image/Index" class="back-button">← Вернуться к форме</a>
         <h2>Результаты обработки</h2>
         <div class="image-grid">
@@ -54,10 +51,6 @@
                         @if (i < Model.FormattedRoute.Count - 1)
                         {
                             <span class="route-arrow">→</span>
-                        }
-                        @if ((i + 1) % 10 == 0 && i < Model.FormattedRoute.Count - 1)
-                        {
-                            <br />
                         }
                     }
                 </div>

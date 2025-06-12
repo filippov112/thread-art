@@ -35,12 +35,15 @@ public class ImageService : IImageService
 
     public async Task<(string ResultImagePath, string RouteFilePath, List<(int, int)> Route, List<(int, int)> GridPoints, List<string> FormattedRoute)> ProcessImageAsync(string imagePath, CalculationParameters parameters)
     {
-        var outputImagePath = Path.Combine("/images", "output.png");
-        var routeFilePath = Path.Combine("/images", "route.txt");
+        Guid guid = Guid.NewGuid();
+        var outputImagePath = Path.Combine("/images", $"{guid.ToString()}_output.png");
+        var routePixelFilePath = Path.Combine("/images", $"{guid.ToString()}_routepixel.txt");
+        var routeFilePath = Path.Combine("/images", $"{guid.ToString()}_route.txt");
 
         var (gridPoints, formattedRoute) = await processor.ProcessImage(
             _env.WebRootPath + imagePath,
             _env.WebRootPath + outputImagePath,
+            _env.WebRootPath + routePixelFilePath,
             _env.WebRootPath + routeFilePath,
             (parameters.SmallWidth, parameters.SmallHeight),
             (parameters.LargeWidth, parameters.LargeHeight),
@@ -50,7 +53,7 @@ public class ImageService : IImageService
             parameters.Dx
         );
 
-        var route = File.ReadAllLines(_env.WebRootPath + routeFilePath)
+        var route = File.ReadAllLines(_env.WebRootPath + routePixelFilePath)
                         .Select(line => line.Split(','))
                         .Select(parts => (int.Parse(parts[0]), int.Parse(parts[1])))
                         .ToList();
