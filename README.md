@@ -69,3 +69,6 @@ The application will be available at: `https://localhost:5001` (or `http://local
 Notes:
 - For large images or complex parameters, processing may take some time.
 - The processing results are temporarily stored on the server and are automatically deleted after a specified period of time.
+
+---
+[LICENCE](LICENCE)
