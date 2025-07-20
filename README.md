@@ -71,4 +71,4 @@ Notes:
 - The processing results are temporarily stored on the server and are automatically deleted after a specified period of time.
 
 ---
-[LICENCE](LICENCE)
+[LICENSE](LICENSE)
