@@ -36,9 +36,9 @@ public class ImageService : IImageService
     public async Task<(string ResultImagePath, string RouteFilePath, List<(int, int)> Route, List<(int, int)> GridPoints, List<string> FormattedRoute)> ProcessImageAsync(string imagePath, CalculationParameters parameters)
     {
         Guid guid = Guid.NewGuid();
-        var outputImagePath = Path.Combine("/images", $"{guid.ToString()}_output.png");
-        var routePixelFilePath = Path.Combine("/images", $"{guid.ToString()}_routepixel.txt");
-        var routeFilePath = Path.Combine("/images", $"{guid.ToString()}_route.txt");
+        var outputImagePath = Path.Combine("/images", $"{guid}_output.png");
+        var routePixelFilePath = Path.Combine("/images", $"{guid}_routepixel.txt");
+        var routeFilePath = Path.Combine("/images", $"{guid}_route.txt");
 
         var (gridPoints, formattedRoute) = await processor.ProcessImage(
             _env.WebRootPath + imagePath,
