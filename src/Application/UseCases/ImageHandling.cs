@@ -38,10 +38,10 @@ namespace Application.UseCases
             await painter.DrawImage(renderMatrix, padding);
 
             // Нанесем координатную сетку
-            foreach (PixelPoint point in smallMatrix.NodesAndPaths.Keys)
+            foreach (PixelPoint point in canvas.LargeMatrix.NodesAndPaths.Keys)
             {
                 var imagePoint = new PixelPoint(point.X + padding, point.Y + padding);
-                var sectorPoint = smallMatrix.ConvertToCoordinate(point);
+                var sectorPoint = canvas.LargeMatrix.ConvertToCoordinate(point);
                 painter.DrawCoordinate(imagePoint, sectorPoint);
             }
                     

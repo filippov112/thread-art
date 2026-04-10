@@ -28,8 +28,11 @@ public class ImageController : Controller
             {
                 WebRootPath = imagesFolder
             };
-            config.ResultImagePath = Path.Combine(config.WebRootPath, $"{guid}_output.png");
-            config.ResultRoutePath = Path.Combine(config.WebRootPath, $"{guid}_route.txt");
+            var outputImagePath = $"{guid.ToString()}_output.png";
+            var routeFilePath = $"{guid.ToString()}_route.txt";
+
+            config.ResultImagePath = Path.Combine(config.WebRootPath, outputImagePath);
+            config.ResultRoutePath = Path.Combine(config.WebRootPath, routeFilePath);
             config.ContrastLine = parameters.ContrastLine;
             config.IsEllipse = parameters.IsEllipse;
             config.CountSteps = parameters.CountSteps;
@@ -39,9 +42,9 @@ public class ImageController : Controller
 
             await _imageService.ProcessImage(parameters.ImageFile, config);
 
-            parameters.OriginalImagePath = config.OriginalImagePath;
-            parameters.ResultImagePath = config.ResultImagePath;
-            parameters.ResultRoutePath = config.ResultRoutePath;
+            parameters.OriginalImagePath = Path.Combine("/Images", Path.GetFileName(config.OriginalImagePath));
+            parameters.ResultImagePath = Path.Combine("/Images", outputImagePath);
+            parameters.ResultRoutePath = Path.Combine("/Images", routeFilePath);
 
             return View("Result", parameters);
         }

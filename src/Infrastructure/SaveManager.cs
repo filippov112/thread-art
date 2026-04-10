@@ -9,7 +9,7 @@ namespace Infrastructure
         public async Task<string> SaveImageAsync(IFormFile file, Config config)
         {
 
-            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(config.OriginalImagePath);
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
             var filePath = Path.Combine(config.WebRootPath, fileName);
             using (var stream = new FileStream(filePath, FileMode.Create))
             {

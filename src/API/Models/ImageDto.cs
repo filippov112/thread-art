@@ -13,5 +13,5 @@ public class ImageDto
     public int CountPoints { get; set; } = 240;
     public int CountSteps { get; set; } = 4000;
     public bool IsEllipse { get; set; } = false;
-    public double ContrastLine { get; set; } = 0.1;
+    public double ContrastLine { get; set; } = 1;
 }
