@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Application.Services
 {
-    public interface IStartPointSelecter
+    public interface IStartPointSelector
     {
         public PixelPoint SelectBeginPoint(List<PixelPoint> keys);
     }

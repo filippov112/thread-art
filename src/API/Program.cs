@@ -1,23 +1,39 @@
+using Application.Services;
+using Application.UseCases;
+using Infrastructure;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddTransient<ImageHandling, ImageHandling>();
+builder.Services.AddTransient<IPainter, Painter>();
+builder.Services.AddTransient<ISaveManager, SaveManager>();
+builder.Services.AddTransient<IStartPointSelector, StartPointSelector>();
+builder.Services.AddHostedService<FileCleanupService>();
 
-builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddSignalR();
+builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (!app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseExceptionHandler("/Home/Error");
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting();
 
 app.UseAuthorization();
 
-app.MapControllers();
+app.MapHub<ProgressHub>("/progressHub");
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Image}/{action=Index}/{id?}");
 
 app.Run();

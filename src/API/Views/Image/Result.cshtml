@@ -1,4 +1,4 @@
-@model ImageModel
+@model ImageDto
 
 @{
     ViewData["Title"] = "Результат расчета";
@@ -28,7 +28,7 @@
         <h2>Маршрут в координатах сетки</h2>
         <div class="route-container">
             <div class="route-info">
-                @if (Model.Parameters.IsEllipseMatrix)
+                @if (Model.IsEllipse)
                 {
                     <p><strong>Система координат:</strong> Эллиптическая сетка</p>
                     <p><strong>Обозначения секторов:</strong> A (0°-90°), B (90°-180°), C (180°-270°), D (270°-360°)</p>
@@ -42,34 +42,11 @@
                 }
             </div>
             
-            <div class="route-display">
-                <h4>Форматированный маршрут:</h4>
-                <div class="formatted-route">
-                    @for (int i = 0; i < Model.FormattedRoute.Count; i++)
-                    {
-                        <span class="route-point">@Model.FormattedRoute[i]</span>
-                        @if (i < Model.FormattedRoute.Count - 1)
-                        {
-                            <span class="route-arrow">→</span>
-                        }
-                    }
-                </div>
-            </div>
-            
-            <details>
-                <summary>Показать координаты холста (для отладки)</summary>
-                <ul class="route-list">
-                    @foreach (var point in Model.Route)
-                    {
-                        <li>@point</li>
-                    }
-                </ul>
-            </details>
         </div>
         
         <div class="download-links">
             <a href="@Model.ResultImagePath" download class="download-button">Скачать результат (изображение)</a>
-            <a href="@Model.RouteFilePath" download class="download-button">Скачать маршрут (текстовый файл)</a>
+            <a href="@Model.ResultRoutePath" download class="download-button">Скачать маршрут (текстовый файл)</a>
         </div>
     </div>
 

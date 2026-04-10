@@ -1,23 +1,25 @@
-﻿using Domain.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Domain.Tools
+namespace Domain.Models
 {
-    public static class Calculator
+    public class Line
     {
+        public Line(PixelPoint A, PixelPoint B)
+        {
+            Points = GetBresenhamLine(A, B);
+        }
+        public List<PixelPoint> Points = [];
+
         /// <summary>
         /// Вычисляет координаты точек матрицы, лежащие на прямой линии между двумя точками на её краях
         /// </summary>
-        /// <param name="a">Точка начала линии</param>
-        /// <param name="b">Точка конца линии</param>
-        /// <returns></returns>
-        public static List<PixelPoint> BresenhamLine(PixelPoint a, PixelPoint b)
+        private List<PixelPoint> GetBresenhamLine(PixelPoint A, PixelPoint B)
         {
-            var (x1, y1) = a;
-            var (x2, y2) = b;
-            var points = new List<(int, int)>();
+            var (x1, y1) = A;
+            var (x2, y2) = B;
+            var points = new List<PixelPoint>();
             int dx = Math.Abs(x2 - x1);
             int dy = Math.Abs(y2 - y1);
             int sx = x1 < x2 ? 1 : -1;
@@ -26,7 +28,7 @@ namespace Domain.Tools
 
             while (true)
             {
-                points.Add((x1, y1));
+                points.Add(new(x1, y1));
                 if (x1 == x2 && y1 == y2) break;
                 int e2 = 2 * err;
                 if (e2 > -dy)
@@ -41,6 +43,13 @@ namespace Domain.Tools
                 }
             }
             return points;
+        }
+
+        public bool IsRevert(Line other)
+        {
+            if (other.Points.Count == 0 || Points.Count == 0) 
+                return false;
+            return other.Points.First() == Points.Last() && other.Points.Last() == Points.First();
         }
     }
 }
