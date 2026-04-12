@@ -12,7 +12,7 @@ namespace Infrastructure
     public class Painter: IPainter
     {
         // Цвета для разных секторов/сторон
-        private Dictionary<char, Color> Colors = new() {
+        private readonly Dictionary<char, Color> _colors = new() {
                 {'A', Color.Red},
                 {'B', Color.Blue},
                 {'C', Color.Green},
@@ -22,17 +22,17 @@ namespace Infrastructure
                 {'L', Color.Purple}
             };
 
-        private Font font = SystemFonts.CreateFont("Arial", 8);
+        private readonly Font _font = SystemFonts.CreateFont("Arial", 8);
 
-        private Image<Rgba32> BaseImage;
-        private Image<Rgba32> SmallImage;
-        private Image<Rgba32> RenderImage;
+        private Image<Rgba32>? _baseImage;
+        private Image<Rgba32>? _smallImage;
+        private Image<Rgba32>? _renderImage;
 
 
         public async Task<double[,]> GetImageGrayNegativeMatrix(string inputImagePath, SizeImage smallSize)
         {
-            BaseImage = await Image.LoadAsync<Rgba32>(inputImagePath);
-            SmallImage = BaseImage.Clone(ctx => ctx.Resize(new ResizeOptions
+            _baseImage = await Image.LoadAsync<Rgba32>(inputImagePath);
+            _smallImage = _baseImage.Clone(ctx => ctx.Resize(new ResizeOptions
             {
                 Size = new Size(smallSize.Width, smallSize.Height),
                 Mode = ResizeMode.Crop, // Обрезаем изображение вместо деформации
@@ -44,7 +44,7 @@ namespace Infrastructure
             {
                 for (int y = 0; y < smallSize.Height; y++)
                 {
-                    smallMatrix[x, y] = 255 - (SmallImage[x, y].R + SmallImage[x, y].R + SmallImage[x, y].R) / 3;
+                    smallMatrix[x, y] = 255 - (_smallImage[x, y].R + _smallImage[x, y].R + _smallImage[x, y].R) / 3;
                 }
             }
             return smallMatrix;
@@ -58,12 +58,12 @@ namespace Infrastructure
         /// <returns></returns>
         public async Task DrawImage(double[,] values, int padding)
         {
-            RenderImage = new(values.GetLength(0) + padding * 2, values.GetLength(1) + padding * 2);
+            _renderImage = new(values.GetLength(0) + padding * 2, values.GetLength(1) + padding * 2);
             for (int i = 0; i < values.GetLength(0); i++)
                 for(int j = 0;  j < values.GetLength(1); j++)
                 {
                     int newValue = 255 - (int)values[i, j];
-                    RenderImage[i + padding, j + padding] = new Rgba32((byte)newValue, (byte)newValue, (byte)newValue);
+                    _renderImage[i + padding, j + padding] = new Rgba32((byte)newValue, (byte)newValue, (byte)newValue);
                 }
 
         }
@@ -75,25 +75,27 @@ namespace Infrastructure
         /// <param name="sectorPoint"></param>
         public void DrawCoordinate(PixelPoint imagePoint, SectorPoint sectorPoint)
         {
-            var color = Colors.TryGetValue(sectorPoint.Sector, out Color value) ? value : Color.Black;
+            if (_renderImage == null)
+                return;
+            var color = _colors.TryGetValue(sectorPoint.Sector, out Color value) ? value : Color.Black;
             var markerBrush = new SolidBrush(color);
 
             // Рисуем маркер точки (круг) - исправленная версия
-            RenderImage.Mutate(ctx => ctx.Fill(
+            _renderImage.Mutate(ctx => ctx.Fill(
                 new DrawingOptions { GraphicsOptions = new GraphicsOptions { Antialias = true } },
                 markerBrush,
                 new EllipsePolygon(new PointF(imagePoint.X, imagePoint.Y), 3f)
             ));
 
             // Белая обводка
-            RenderImage.Mutate(ctx => ctx.Draw(
+            _renderImage.Mutate(ctx => ctx.Draw(
                 new DrawingOptions { GraphicsOptions = new GraphicsOptions { Antialias = true } },
                 Pens.Solid(Color.White, 2),
                 new EllipsePolygon(new PointF(imagePoint.X, imagePoint.Y), 3f)
             ));
 
             // Текст
-            RenderImage.Mutate(ctx => ctx.DrawText(new RichTextOptions(font)
+            _renderImage.Mutate(ctx => ctx.DrawText(new RichTextOptions(_font)
             {
                 Origin = new PointF(imagePoint.X + 3, imagePoint.Y), // смещение на 3 пикселя по ширине
                 HorizontalAlignment = HorizontalAlignment.Left,
@@ -105,7 +107,7 @@ namespace Infrastructure
 
         public async Task SaveImage(string path)
         {
-            RenderImage.Save(path);
+            _renderImage?.Save(path);
         }
 
         public void Dispose()
