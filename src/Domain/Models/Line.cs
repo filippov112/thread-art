@@ -4,18 +4,14 @@ using System.Text;
 
 namespace Domain.Models
 {
-    public class Line
+    public class Line(PixelPoint A, PixelPoint B)
     {
-        public Line(PixelPoint A, PixelPoint B)
-        {
-            Points = GetBresenhamLine(A, B);
-        }
-        public List<PixelPoint> Points = [];
+        public List<PixelPoint> Points = GetBresenhamLine(A, B);
 
         /// <summary>
         /// Вычисляет координаты точек матрицы, лежащие на прямой линии между двумя точками на её краях
         /// </summary>
-        private List<PixelPoint> GetBresenhamLine(PixelPoint A, PixelPoint B)
+        private static List<PixelPoint> GetBresenhamLine(PixelPoint A, PixelPoint B)
         {
             var (x1, y1) = A;
             var (x2, y2) = B;
@@ -28,8 +24,12 @@ namespace Domain.Models
 
             while (true)
             {
-                points.Add(new(x1, y1));
-                if (x1 == x2 && y1 == y2) break;
+                points.Add(new(x1, y1, A.Number));
+                if (x1 == x2 && y1 == y2)
+                {
+                    points.Last().Number = B.Number;
+                    break;
+                }
                 int e2 = 2 * err;
                 if (e2 > -dy)
                 {

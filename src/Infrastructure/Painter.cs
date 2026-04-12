@@ -9,7 +9,7 @@ using SixLabors.ImageSharp.Processing;
 
 namespace Infrastructure
 {
-    public class Painter: IPainter
+    public class Painter : IPainter
     {
         // Цвета для разных секторов/сторон
         private readonly Dictionary<char, Color> _colors = new() {
@@ -24,30 +24,22 @@ namespace Infrastructure
 
         private readonly Font _font = SystemFonts.CreateFont("Arial", 8);
 
-        private Image<Rgba32>? _baseImage;
-        private Image<Rgba32>? _smallImage;
-        private Image<Rgba32>? _renderImage;
+        private Image<Rgba32>? _image;
+        public SizeImage? Size => _image != null ? new SizeImage(_image.Width, _image.Height) : null;
 
 
-        public async Task<double[,]> GetImageGrayNegativeMatrix(string inputImagePath, SizeImage smallSize)
+        public async Task<double[,]> GetImageGrayNegativeMatrix(string inputImagePath)
         {
-            _baseImage = await Image.LoadAsync<Rgba32>(inputImagePath);
-            _smallImage = _baseImage.Clone(ctx => ctx.Resize(new ResizeOptions
+            _image = await Image.LoadAsync<Rgba32>(inputImagePath);
+            var matrix = new double[_image.Width, _image.Height];
+            for (int x = 0; x < _image.Width; x++)
             {
-                Size = new Size(smallSize.Width, smallSize.Height),
-                Mode = ResizeMode.Crop, // Обрезаем изображение вместо деформации
-                Position = AnchorPositionMode.Center // Центрируем изображение перед обрезкой
-            }));
-
-            var smallMatrix = new double[smallSize.Width, smallSize.Height];
-            for (int x = 0; x < smallSize.Width; x++)
-            {
-                for (int y = 0; y < smallSize.Height; y++)
+                for (int y = 0; y < _image.Height; y++)
                 {
-                    smallMatrix[x, y] = 255 - (_smallImage[x, y].R + _smallImage[x, y].R + _smallImage[x, y].R) / 3;
+                    matrix[x, y] = 255 - (_image[x, y].R + _image[x, y].R + _image[x, y].R) / 3;
                 }
             }
-            return smallMatrix;
+            return matrix;
         }
 
         /// <summary>
@@ -58,12 +50,12 @@ namespace Infrastructure
         /// <returns></returns>
         public async Task DrawImage(double[,] values, int padding)
         {
-            _renderImage = new(values.GetLength(0) + padding * 2, values.GetLength(1) + padding * 2);
+            _image = new(values.GetLength(0) + padding * 2, values.GetLength(1) + padding * 2);
             for (int i = 0; i < values.GetLength(0); i++)
                 for(int j = 0;  j < values.GetLength(1); j++)
                 {
                     int newValue = 255 - (int)values[i, j];
-                    _renderImage[i + padding, j + padding] = new Rgba32((byte)newValue, (byte)newValue, (byte)newValue);
+                    _image[i + padding, j + padding] = new Rgba32((byte)newValue, (byte)newValue, (byte)newValue);
                 }
 
         }
@@ -72,42 +64,42 @@ namespace Infrastructure
         /// Отрисовывает метку координаты
         /// </summary>
         /// <param name="imagePoint"></param>
-        /// <param name="sectorPoint"></param>
-        public void DrawCoordinate(PixelPoint imagePoint, SectorPoint sectorPoint)
+        /// <param name="point"></param>
+        public void DrawCoordinate(SectorPoint point)
         {
-            if (_renderImage == null)
+            if (_image == null)
                 return;
-            var color = _colors.TryGetValue(sectorPoint.Sector, out Color value) ? value : Color.Black;
+            var color = _colors.TryGetValue(point.Sector, out Color value) ? value : Color.Black;
             var markerBrush = new SolidBrush(color);
 
             // Рисуем маркер точки (круг) - исправленная версия
-            _renderImage.Mutate(ctx => ctx.Fill(
+            _image.Mutate(ctx => ctx.Fill(
                 new DrawingOptions { GraphicsOptions = new GraphicsOptions { Antialias = true } },
                 markerBrush,
-                new EllipsePolygon(new PointF(imagePoint.X, imagePoint.Y), 3f)
+                new EllipsePolygon(new PointF(point.Pixel?.X ?? 0, point.Pixel?.Y ?? 0), 3f)
             ));
 
             // Белая обводка
-            _renderImage.Mutate(ctx => ctx.Draw(
+            _image.Mutate(ctx => ctx.Draw(
                 new DrawingOptions { GraphicsOptions = new GraphicsOptions { Antialias = true } },
                 Pens.Solid(Color.White, 2),
-                new EllipsePolygon(new PointF(imagePoint.X, imagePoint.Y), 3f)
+                new EllipsePolygon(new PointF(point.Pixel?.X ?? 0, point.Pixel?.Y ?? 0), 3f)
             ));
 
             // Текст
-            _renderImage.Mutate(ctx => ctx.DrawText(new RichTextOptions(_font)
+            _image.Mutate(ctx => ctx.DrawText(new RichTextOptions(_font)
             {
-                Origin = new PointF(imagePoint.X + 3, imagePoint.Y), // смещение на 3 пикселя по ширине
+                Origin = new PointF((point.Pixel?.X ?? 0) + 3, point.Pixel?.Y ?? 0), // смещение на 3 пикселя по ширине
                 HorizontalAlignment = HorizontalAlignment.Left,
                 VerticalAlignment = VerticalAlignment.Center
-            }, sectorPoint.ToString(), new SolidBrush(color)));
+            }, point.ToString(), new SolidBrush(color)));
         }
 
         
 
         public async Task SaveImage(string path)
         {
-            _renderImage?.Save(path);
+            _image?.Save(path);
         }
 
         public void Dispose()

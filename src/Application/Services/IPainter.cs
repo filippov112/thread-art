@@ -7,9 +7,10 @@ namespace Application.Services
 {
     public interface IPainter: IDisposable
     {
-        public Task<double[,]> GetImageGrayNegativeMatrix(string inputImagePath, SizeImage smallSize);
+        public Task<double[,]> GetImageGrayNegativeMatrix(string inputImagePath);
+        public SizeImage? Size { get; }
         public Task DrawImage(double[,] values, int padding);
-        public void DrawCoordinate(PixelPoint imagePoint, SectorPoint sectorPoint);
+        public void DrawCoordinate(SectorPoint point);
         public Task SaveImage(string path);
     }
 }

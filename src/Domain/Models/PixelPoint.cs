@@ -8,8 +8,13 @@ namespace Domain.Models
 {
     public class PixelPoint(int x, int y)
     {
+        public PixelPoint(int x, int y, int number) : this(x, y)
+        {
+            Number = number;
+        }
         public int X = x; 
         public int Y = y;
+        public int Number;
 
         public override bool Equals([NotNullWhen(true)] object? obj)
         {

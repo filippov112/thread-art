@@ -8,7 +8,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddTransient<ImageHandling, ImageHandling>();
 builder.Services.AddTransient<IPainter, Painter>();
 builder.Services.AddTransient<ISaveManager, SaveManager>();
-builder.Services.AddTransient<IStartPointSelector, StartPointSelector>();
 builder.Services.AddHostedService<FileCleanupService>();
 
 builder.Services.AddSignalR();

@@ -18,19 +18,14 @@ namespace Domain.Models
         /// Высота в пикселях
         /// </summary>
         public int Height;
-        /// <summary>
-        /// Тип матрицы (эллипс / прямоугольник)
-        /// </summary>
-        public bool IsEllipse;
 
 
-        public Matrix(int width, int height, int n, bool isEllipseMatrix)
+        public Matrix(int width, int height, int n)
         {
-            IsEllipse = isEllipseMatrix;
             Width = width;
             Height = height;
             
-            NodesAndPaths = CreatePathDictionary(n);
+            CreatePathDictionary(n);
         }
         /// <summary>
         /// Создает словарь возможных маршрутов из каждой точки по периметру изображения
@@ -40,56 +35,35 @@ namespace Domain.Models
         /// <param name="n">Число точек по периметру</param>
         /// <param name="isEllipseMatrix">Тип матрицы (круг / прямоугольник)</param>
         /// <returns></returns>
-        private Dictionary<PixelPoint, List<Line>> CreatePathDictionary(int n)
+        private void CreatePathDictionary(int n)
         {
             var sidePoints = new List<PixelPoint>();
-            int stepPixel = 2 * (Height + Width) / n;
+            int stepPoint = 2 * (Width + Height) / n + 1;
 
             // Вычисляем вершины
-            if (IsEllipse)
+            for (int i = 1; i * stepPoint < Height; i++)
             {
-                double a = Width / 2.0 - 1;
-                double b = Height / 2.0 - 1;
-                for (double angle = 0; angle < 2 * Math.PI; angle += 2 * Math.PI / n)
-                {
-                    int x = Math.Clamp((int)(a * Math.Cos(angle) + a), 0, Width - 1);
-                    int y = Math.Clamp((int)(b * Math.Sin(angle) + b), 0, Height - 1);
-                    sidePoints.Add(new(y, x));
-                }
+                sidePoints.Add(new(0, i * stepPoint, i));
+                sidePoints.Add(new(Width - 1, i * stepPoint, i));
             }
-            else
+            for (int j = 1; j * stepPoint < Width; j++)
             {
-                for (int i = 0; i < Width; i += stepPixel)
-                {
-                    sidePoints.Add(new(0, i));
-                    sidePoints.Add(new(Height - 1, i));
-                }
-                for (int j = 0; j < Height; j += stepPixel)
-                {
-                    sidePoints.Add(new(j, 0));
-                    sidePoints.Add(new(j, Width - 1));
-                }
+                sidePoints.Add(new(j * stepPoint, 0, j));
+                sidePoints.Add(new(j * stepPoint, Height - 1, j));
             }
 
             // Генерируем маршруты
-            var paths = new Dictionary<PixelPoint, List<Line>>();
             foreach (var start in sidePoints)
             {
-                paths[start] = [];
+                NodesAndPaths[start] = [];
                 foreach (var end in sidePoints)
                 {
-                    if (start != end && (IsEllipse || !(
-                        (start.X == 0 && end.X == 0) ||
-                        (start.X == Height - 1 && end.X == Height - 1) ||
-                        (start.Y == 0 && end.Y == 0) ||
-                        (start.Y == Width - 1 && end.Y == Width - 1)
-                    )))
+                    if (start != end && start.X != end.X && start.Y != end.Y)
                     {
-                        paths[start].Add(new(start, end));
+                        NodesAndPaths[start].Add(new(start, end));
                     }
                 }
             }
-            return paths;
         }
 
         /// <summary>
@@ -97,33 +71,18 @@ namespace Domain.Models
         /// </summary>
         /// <param name="p"></param>
         /// <returns></returns>
-        public SectorPoint ConvertToCoordinate(PixelPoint p)
+        public SectorPoint ConvertToCoordinate(PixelPoint p, int padding)
         {
-            // Разделяем эллипс на 4 сектора
-            int index = NodesAndPaths.Keys.ToList().IndexOf(p);
-            int pointsPerSector = NodesAndPaths.Count / 4;
-            int sector = index / pointsPerSector;
-            int positionInSector = index % pointsPerSector;
-            char sectorLetter;
-            if (IsEllipse)
-                sectorLetter = sector switch
-                {
-                    0 => 'A', // Правая часть (0° - 90°)
-                    1 => 'B', // Верхняя часть (90° - 180°)
-                    2 => 'C', // Левая часть (180° - 270°)
-                    3 => 'D', // Нижняя часть (270° - 360°)
-                    _ => 'A'
-                };
-            else
-                sectorLetter = sector switch
-                {
-                    0 => 'T',
-                    1 => 'R',
-                    2 => 'B',
-                    3 => 'L',
-                    _ => 'T'
-                };
-            return new(sectorLetter, positionInSector + 1); 
+            char sectorLetter = 'U';
+            if (p.X == 0)
+                sectorLetter = 'L';
+            if (p.X == Width - 1)
+                sectorLetter = 'R';
+            if (p.Y == 0)
+                sectorLetter = 'T';
+            if (p.Y == Height - 1)
+                sectorLetter = 'B';
+            return new(sectorLetter, p.Number, new(p.X + padding, p.Y + padding)); 
         }
 
 
@@ -189,6 +148,44 @@ namespace Domain.Models
                 }
             }
             return bestPath;
+        }
+
+        public PixelPoint SelectBeginPoint()
+        {
+            var keys = NodesAndPaths.Keys.ToList();
+            return keys[new Random().Next(NodesAndPaths.Count)];
+        }
+
+        /// <summary>
+        /// Проецирует маршрут линий на матрицу отрисовки
+        /// </summary>
+        /// <param name="route">Маршрут</param>
+        /// <returns>Матрица отрисовки</returns>
+        public async Task<double[,]> RenderRoute(List<Line> route)
+        {
+            double[,] renderingMatrix = new double[Width, Height];
+            for (int i = 0; i < Width; i++)
+                for (int j = 0; j < Height; j++)
+                    renderingMatrix[i, j] = 0;
+
+            double maxValue = 0;
+            foreach (var line in route)
+            {
+                foreach (var point in line.Points)
+                {
+                    var value = renderingMatrix[point.X, point.Y] + 1;
+                    maxValue = Math.Max(maxValue, value);
+                    renderingMatrix[point.X, point.Y] += 1;
+                }
+            }
+
+            // Нормализуем до битовых значений
+            for (int i = 0; i < Width; i++)
+                for (int j = 0; j < Height; j++)
+                {
+                    renderingMatrix[i, j] = 255 * renderingMatrix[i, j] / maxValue;
+                }
+            return renderingMatrix;
         }
     }
 }

@@ -5,10 +5,11 @@ using System.Text;
 
 namespace Domain.Models
 {
-    public struct SectorPoint(char sector, int number)
+    public struct SectorPoint(char sector, int number, PixelPoint pixel)
     {
         public char Sector = sector;
         public int Number = number;
+        public PixelPoint? Pixel = pixel;
 
         public override readonly bool Equals([NotNullWhen(true)] object? obj)
         {

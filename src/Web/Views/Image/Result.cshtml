@@ -28,22 +28,11 @@
         <h2>Маршрут в координатах сетки</h2>
         <div class="route-container">
             <div class="route-info">
-                @if (Model.IsEllipse)
-                {
-                    <p><strong>Система координат:</strong> Эллиптическая сетка</p>
-                    <p><strong>Обозначения секторов:</strong> A (0°-90°), B (90°-180°), C (180°-270°), D (270°-360°)</p>
-                    <p><strong>Формат координат:</strong> [Сектор][Номер точки в секторе]</p>
-                }
-                else
-                {
-                    <p><strong>Система координат:</strong> Прямоугольная сетка</p>
-                    <p><strong>Обозначения сторон:</strong> T (верх), B (низ), L (лево), R (право)</p>
-                    <p><strong>Формат координат:</strong> [Сторона][Номер точки на стороне]</p>
-                }
+                <p><strong>Система координат:</strong> Прямоугольная сетка</p>
+                <p><strong>Обозначения сторон:</strong> T (верх), B (низ), L (лево), R (право)</p>
+                <p><strong>Формат координат:</strong> [Сторона][Номер точки на стороне]</p>
             </div>
-            
         </div>
-        
         <div class="download-links">
             <a href="@Model.ResultImagePath" download class="download-button">Скачать результат (изображение)</a>
             <a href="@Model.ResultRoutePath" download class="download-button">Скачать маршрут (текстовый файл)</a>

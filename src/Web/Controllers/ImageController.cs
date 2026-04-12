@@ -2,16 +2,10 @@ using Application.UseCases;
 using Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 
-public class ImageController : Controller
+public class ImageController(ImageHandling imageService, IWebHostEnvironment env) : Controller
 {
-    private readonly ImageHandling _imageService;
-    private readonly IWebHostEnvironment _env;
-
-    public ImageController(ImageHandling imageService, IWebHostEnvironment env)
-    {
-        _imageService = imageService;
-        _env = env;
-    }
+    private readonly ImageHandling _imageService = imageService;
+    private readonly IWebHostEnvironment _env = env;
 
     [HttpPost]
     public async Task<IActionResult> UploadImage(ImageDto parameters)
@@ -28,17 +22,14 @@ public class ImageController : Controller
             {
                 WebRootPath = imagesFolder
             };
-            var outputImagePath = $"{guid.ToString()}_output.png";
-            var routeFilePath = $"{guid.ToString()}_route.txt";
+            var outputImagePath = $"{guid}_output.png";
+            var routeFilePath = $"{guid}_route.txt";
 
             config.ResultImagePath = Path.Combine(config.WebRootPath, outputImagePath);
             config.ResultRoutePath = Path.Combine(config.WebRootPath, routeFilePath);
             config.ContrastLine = parameters.ContrastLine;
-            config.IsEllipse = parameters.IsEllipse;
             config.CountSteps = parameters.CountSteps;
             config.CountPoints = parameters.CountPoints;
-            config.LargeSize = parameters.LargeSize;
-            config.SmallSize = parameters.SmallSize;
 
             await _imageService.ProcessImage(parameters.ImageFile, config);
 
