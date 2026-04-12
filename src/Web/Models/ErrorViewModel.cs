@@ -1,4 +1,4 @@
-namespace threadart.Models;
+namespace Web.Models;
 
 public class ErrorViewModel
 {
