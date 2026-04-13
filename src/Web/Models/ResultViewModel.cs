@@ -1,4 +1,4 @@
-public class ImageDto
+public class ResultViewModel
 {
     public IFormFile? ImageFile { get; set; }
     public string WebRootPath { get; set; } = string.Empty;

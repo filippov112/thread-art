@@ -2,51 +2,57 @@ using Application.UseCases;
 using Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 
-public class ImageController(ImageHandling imageService, IWebHostEnvironment env) : Controller
+public class ImageController(ImageProcessor imageService, IWebHostEnvironment env) : Controller
 {
-    private readonly ImageHandling _imageService = imageService;
+    private readonly ImageProcessor _imageService = imageService;
     private readonly IWebHostEnvironment _env = env;
 
     [HttpPost]
-    public async Task<IActionResult> UploadImage(ImageDto parameters)
+    public async Task<IActionResult> UploadImage(ResultViewModel data)
     {
-        if (parameters.ImageFile != null && parameters.ImageFile.Length > 0)
+        if (data.ImageFile == null || data.ImageFile.Length == 0)
+            return View("Index", data);
+
+        var request = new ProcessImageRequest
         {
-            var imagesFolder = Path.Combine(_env.WebRootPath, "images");
-            if (!Directory.Exists(imagesFolder))
+            ImageStream = data.ImageFile.OpenReadStream(),
+            FileName = data.ImageFile.FileName,
+            Directory = _env.WebRootPath,
+            Config = new Config
             {
-                Directory.CreateDirectory(imagesFolder);
+                CountPoints = data.CountPoints,
+                CountSteps = data.CountSteps,
+                ContrastLine = data.ContrastLine
             }
-            Guid guid = Guid.NewGuid();
-            Config config = new()
+        };
+
+        try
+        {
+            var result = await _imageService.ProcessImageAsync(request);
+
+            var viewModel = new ResultViewModel
             {
-                WebRootPath = imagesFolder
+                OriginalImagePath = '/' + result.OriginalImagePath,
+                ResultImagePath = '/' + result.ResultImagePath,
+                ResultRoutePath = '/' + result.RouteFilePath,
+
+                CountPoints = request.Config.CountPoints,
+                CountSteps = request.Config.CountSteps,
+                ContrastLine = request.Config.ContrastLine
             };
-            var outputImagePath = $"{guid}_output.png";
-            var routeFilePath = $"{guid}_route.txt";
 
-            config.ResultImagePath = Path.Combine(config.WebRootPath, outputImagePath);
-            config.ResultRoutePath = Path.Combine(config.WebRootPath, routeFilePath);
-            config.Extension = Path.GetExtension(parameters.ImageFile.FileName);
-            config.ContrastLine = parameters.ContrastLine;
-            config.CountSteps = parameters.CountSteps;
-            config.CountPoints = parameters.CountPoints;
-
-            await _imageService.ProcessImage(parameters.ImageFile.OpenReadStream(), config);
-
-            parameters.OriginalImagePath = Path.Combine("/Images", Path.GetFileName(config.OriginalImagePath));
-            parameters.ResultImagePath = Path.Combine("/Images", outputImagePath);
-            parameters.ResultRoutePath = Path.Combine("/Images", routeFilePath);
-
-            return View("Result", parameters);
+            return View("Result", viewModel);
         }
-
-        return View("Index", parameters);
+        catch (Exception ex)
+        {
+            ModelState.AddModelError("", "Ошибка обработки изображения: " + ex.Message);
+            return View("Index", new ResultViewModel());
+        }
     }
 
     [HttpGet]
     public IActionResult Index()
     {
-        return View(new ImageDto());
+        return View(new ResultViewModel());
     }
 }
