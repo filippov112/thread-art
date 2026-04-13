@@ -113,7 +113,7 @@ namespace Domain.Models
         /// <param name="negativeSourceMatrix">Матрица яркости пикселей исходного изображения (в негативе)</param>
         /// <param name="lineContrast">Значение контрастности линий при отрисовке</param>
         /// <returns>Маршрут (последовательный список линий)</returns>
-        public async Task<List<Line>> BuildRoute(SectorPoint start, PixelMatrix pixelMatrix, double lineContrast, int stepCount)
+        public async Task<List<Line>> BuildRoute(SectorPoint start, PixelMatrix pixelMatrix, double lineContrast, int stepCount, Action<int>? onProgress = null)
         {
             if (!NodesAndPaths.TryGetValue(start, out var paths))
                 throw new Exception("Не найдена стартовая вершина маршрута!");
@@ -128,7 +128,14 @@ namespace Domain.Models
                     pixelMatrix.Values[p.X, p.Y] -= lineContrast;
                 }
                 start = line.End;
+
+                if (onProgress != null && step % Math.Max(1, stepCount / 100) == 0)
+                {
+                    int percent = (int)((step + 1) * 100.0 / stepCount);
+                    onProgress.Invoke(percent);
+                }
             }
+            onProgress?.Invoke(100);
             return route;
         }
 

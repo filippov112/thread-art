@@ -5,9 +5,10 @@ using Infrastructure;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddTransient<ImageProcessor, ImageProcessor>();
+builder.Services.AddTransient<ImageProcessor>();
 builder.Services.AddTransient<IPainter, Painter>();
 builder.Services.AddTransient<ISaveManager, SaveManager>();
+builder.Services.AddTransient<IProgressLogger, ProgressLoggerAdapter>();
 builder.Services.AddHostedService<FileCleanupService>();
 
 builder.Services.AddSignalR();
