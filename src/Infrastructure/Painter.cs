@@ -28,7 +28,7 @@ namespace Infrastructure
         public SizeImage? Size => _image != null ? new SizeImage(_image.Width, _image.Height) : null;
 
 
-        public async Task<double[,]> GetImageGrayNegativeMatrix(string inputImagePath)
+        public async Task<PixelMatrix> GetPixelMatrix(string inputImagePath)
         {
             _image = await Image.LoadAsync<Rgba32>(inputImagePath);
             var matrix = new double[_image.Width, _image.Height];
@@ -39,7 +39,7 @@ namespace Infrastructure
                     matrix[x, y] = 255 - (_image[x, y].R + _image[x, y].G + _image[x, y].B) / 3;
                 }
             }
-            return matrix;
+            return new(matrix);
         }
 
         /// <summary>
@@ -48,8 +48,11 @@ namespace Infrastructure
         /// <param name="values">Значения яркости пикселей (негатив)</param>
         /// <param name="padding">Отступы по краям</param>
         /// <returns></returns>
-        public async Task DrawImage(double[,] values, int padding)
+        public async Task DrawImage(RouteMatrix matrix, List<Line> route)
         {
+            int padding = (int)(Math.Max(matrix.Width, matrix.Height) * 0.05f);
+
+            var values = await matrix.GetRenderImage(route);
             _image = new(values.GetLength(0) + padding * 2, values.GetLength(1) + padding * 2);
             for (int i = 0; i < values.GetLength(0); i++)
                 for (int j = 0; j < values.GetLength(1); j++)
@@ -61,38 +64,40 @@ namespace Infrastructure
         }
 
         /// <summary>
-        /// Отрисовывает метку координаты
+        /// Отрисовывает сетку координат
         /// </summary>
-        /// <param name="imagePoint"></param>
-        /// <param name="point"></param>
-        public void DrawCoordinate(SectorPoint point)
+        public void DrawCoordinateGrid(RouteMatrix matrix)
         {
-            if (_image == null)
-                return;
-            var color = _colors.TryGetValue(point.Sector, out Color value) ? value : Color.Black;
-            var markerBrush = new SolidBrush(color);
-
-            // Рисуем маркер точки (круг) - исправленная версия
-            _image.Mutate(ctx => ctx.Fill(
-                new DrawingOptions { GraphicsOptions = new GraphicsOptions { Antialias = true } },
-                markerBrush,
-                new EllipsePolygon(new PointF(point.Pixel?.X ?? 0, point.Pixel?.Y ?? 0), 3f)
-            ));
-
-            // Белая обводка
-            _image.Mutate(ctx => ctx.Draw(
-                new DrawingOptions { GraphicsOptions = new GraphicsOptions { Antialias = true } },
-                Pens.Solid(Color.White, 2),
-                new EllipsePolygon(new PointF(point.Pixel?.X ?? 0, point.Pixel?.Y ?? 0), 3f)
-            ));
-
-            // Текст
-            _image.Mutate(ctx => ctx.DrawText(new RichTextOptions(_font)
+            int padding = (int)(Math.Max(matrix.Width, matrix.Height) * 0.05f);
+            foreach (SectorPoint sectorPoint in matrix.NodesAndPaths.Keys)
             {
-                Origin = new PointF((point.Pixel?.X ?? 0) + 3, point.Pixel?.Y ?? 0), // смещение на 3 пикселя по ширине
-                HorizontalAlignment = HorizontalAlignment.Left,
-                VerticalAlignment = VerticalAlignment.Center
-            }, point.ToString(), new SolidBrush(color)));
+                if (_image == null)
+                    return;
+                var color = _colors.TryGetValue(sectorPoint.Sector, out Color value) ? value : Color.Black;
+                var markerBrush = new SolidBrush(color);
+
+                // Рисуем маркер точки (круг) - исправленная версия
+                _image.Mutate(ctx => ctx.Fill(
+                    new DrawingOptions { GraphicsOptions = new GraphicsOptions { Antialias = true } },
+                    markerBrush,
+                    new EllipsePolygon(new PointF(sectorPoint.Pixel.X + padding, sectorPoint.Pixel.Y + padding), 3f)
+                ));
+
+                // Белая обводка
+                _image.Mutate(ctx => ctx.Draw(
+                    new DrawingOptions { GraphicsOptions = new GraphicsOptions { Antialias = true } },
+                    Pens.Solid(Color.White, 2),
+                    new EllipsePolygon(new PointF(sectorPoint.Pixel.X + padding, sectorPoint.Pixel.Y + padding), 3f)
+                ));
+
+                // Текст
+                _image.Mutate(ctx => ctx.DrawText(new RichTextOptions(_font)
+                {
+                    Origin = new PointF((sectorPoint.Pixel.X) + 3 + padding, sectorPoint.Pixel.Y + padding), // смещение на 3 пикселя по ширине
+                    HorizontalAlignment = HorizontalAlignment.Left,
+                    VerticalAlignment = VerticalAlignment.Center
+                }, sectorPoint.ToString(), new SolidBrush(color)));
+            }
         }
 
 

@@ -5,7 +5,7 @@ namespace Infrastructure
 {
     public class SaveManager : ISaveManager
     {
-        public async Task<string> SaveImageAsync(Stream fileStream, Config config)
+        public async Task SaveImageAsync(Stream fileStream, Config config)
         {
 
             var newName = $"{Guid.NewGuid()}{config.Extension}";
@@ -13,16 +13,18 @@ namespace Infrastructure
             using var stream = new FileStream(filePath, FileMode.Create);
 
             await fileStream.CopyToAsync(stream);
-            return filePath;
+            config.OriginalImagePath = filePath;
         }
 
-        public async Task SaveRouteAsync(List<string> route, string filename)
+        public async Task SaveRouteAsync(List<Line> route, string filename)
         {
             using (var writer = new StreamWriter(filename))
             {
-                foreach (var point in route)
+                if (route.Count > 0)
+                    await writer.WriteLineAsync(route[0].Start.ToString());
+                foreach (var line in route)
                 {
-                    await writer.WriteLineAsync(point);
+                    await writer.WriteLineAsync(line.End.ToString());
                 }
             }
         }

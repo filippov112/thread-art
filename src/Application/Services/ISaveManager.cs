@@ -4,7 +4,7 @@ namespace Application.Services
 {
     public interface ISaveManager
     {
-        Task<string> SaveImageAsync(Stream fileStream, Config config);
-        Task SaveRouteAsync(List<string> route, string filename);
+        Task SaveImageAsync(Stream fileStream, Config config);
+        Task SaveRouteAsync(List<Line> route, string filename);
     }
 }

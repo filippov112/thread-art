@@ -1,8 +1,10 @@
 ﻿namespace Domain.Models
 {
-    public class Line(PixelPoint A, PixelPoint B)
+    public class Line(SectorPoint a, SectorPoint b)
     {
-        public List<PixelPoint> Points { get; } = GetBresenhamLine(A, B);
+        public SectorPoint Start { get; } = a;
+        public SectorPoint End { get; } = b;
+        public List<PixelPoint> Points { get; } = GetBresenhamLine(a.Pixel, b.Pixel);
 
         /// <summary>
         /// Вычисляет координаты точек матрицы, лежащие на прямой линии между двумя точками на её краях

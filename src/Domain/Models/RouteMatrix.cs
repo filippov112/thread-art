@@ -1,11 +1,13 @@
-﻿namespace Domain.Models
+﻿using System.Collections;
+
+namespace Domain.Models
 {
-    public class Matrix
+    public class RouteMatrix
     {
         /// <summary>
         /// Словарь вершин и маршрутов
         /// </summary>
-        public readonly Dictionary<PixelPoint, List<Line>> NodesAndPaths = [];
+        public readonly Dictionary<SectorPoint, List<Line>> NodesAndPaths = [];
         /// <summary>
         /// Ширина в пикселях
         /// </summary>
@@ -15,8 +17,7 @@
         /// </summary>
         public int Height { get; }
 
-
-        public Matrix(int width, int height, int n)
+        public RouteMatrix(int width, int height, int n)
         {
             Width = width;
             Height = height;
@@ -33,54 +34,77 @@
         /// <returns></returns>
         private void CreatePathDictionary(int n)
         {
-            var sidePoints = new List<PixelPoint>();
+            var size = new SizeImage(Width, Height);
+            var sidePoints = new List<SectorPoint>();
             int stepPoint = 2 * (Width + Height) / n + 1;
 
             // Вычисляем вершины
             for (int i = 1; i * stepPoint < Height; i++)
             {
-                sidePoints.Add(new(0, i * stepPoint, i));
-                sidePoints.Add(new(Width - 1, i * stepPoint, i));
+                sidePoints.Add(new(new(0, i * stepPoint, i), size));
+                sidePoints.Add(new(new(Width - 1, i * stepPoint, i), size));
             }
             for (int j = 1; j * stepPoint < Width; j++)
             {
-                sidePoints.Add(new(j * stepPoint, 0, j));
-                sidePoints.Add(new(j * stepPoint, Height - 1, j));
+                sidePoints.Add(new(new(j * stepPoint, 0, j), size));
+                sidePoints.Add(new(new(j * stepPoint, Height - 1, j), size));
             }
 
             // Генерируем маршруты
-            foreach (var start in sidePoints)
+            
+            foreach (var startSector in sidePoints)
             {
-                NodesAndPaths[start] = [];
-                foreach (var end in sidePoints)
+                NodesAndPaths[startSector] = [];
+                foreach (var endSector in sidePoints)
                 {
-                    if (start != end && start.X != end.X && start.Y != end.Y)
+                    if (startSector != endSector && startSector.Pixel.X != endSector.Pixel.X && startSector.Pixel.Y != endSector.Pixel.Y)
                     {
-                        NodesAndPaths[start].Add(new(start, end));
+                        NodesAndPaths[startSector].Add(new(startSector, endSector));
                     }
                 }
             }
         }
 
-        /// <summary>
-        /// Преобразует пиксельные координаты вершин в секторные
-        /// </summary>
-        /// <param name="p"></param>
-        /// <returns></returns>
-        public SectorPoint ConvertToCoordinate(PixelPoint p, int padding)
+        public async Task<double[,]> GetRenderImage(List<Line> route)
         {
-            char sectorLetter = 'U';
-            if (p.X == 0)
-                sectorLetter = 'L';
-            if (p.X == Width - 1)
-                sectorLetter = 'R';
-            if (p.Y == 0)
-                sectorLetter = 'T';
-            if (p.Y == Height - 1)
-                sectorLetter = 'B';
-            return new(sectorLetter, p.Number, new(p.X + padding, p.Y + padding));
+            double[,] result = new double[Width, Height];
+            for (int i = 0; i < Width; i++)
+                for (int j = 0; j < Height; j++)
+                    result[i, j] = 0;
+
+            await RenderRoute(result, route);
+            var maxValue = await CalcContrast(result);
+
+            // Нормализуем до битовых значений
+            for (int i = 0; i < Width; i++)
+                for (int j = 0; j < Height; j++)
+                {
+                    result[i, j] = 255 * Math.Clamp(result[i, j], 0, 255) / maxValue;
+                }
+            return result;
         }
 
+        /// <summary>
+        /// Проецирует маршрут линий на матрицу отрисовки
+        /// </summary>
+        /// <param name="route">Маршрут</param>
+        /// <returns>Матрица отрисовки</returns>
+        private static async Task RenderRoute(double[,] matrix, List<Line> route)
+        {
+            foreach (var line in route)
+                foreach (var point in line.Points)
+                    matrix[point.X, point.Y] += 1;
+        }
+
+        private async Task<double> CalcContrast(double[,] matrix)
+        {
+            double maxValue = 0;
+            for(int i = 0; i < matrix.GetLength(0); i++)
+                for(int j = 0; j < matrix.GetLength(1); j ++)
+                    if (i != 0 && i != Width - 1 && j != 0 && j != Height - 1) // Пропускаем вершины, как самые плотные узлы
+                        maxValue = Math.Max(maxValue, matrix[i, j]);
+            return maxValue;
+        }
 
         /// <summary>
         /// Строит маршрут линий
@@ -89,7 +113,7 @@
         /// <param name="negativeSourceMatrix">Матрица яркости пикселей исходного изображения (в негативе)</param>
         /// <param name="lineContrast">Значение контрастности линий при отрисовке</param>
         /// <returns>Маршрут (последовательный список линий)</returns>
-        public async Task<List<Line>> BuildRoute(PixelPoint start, double[,] negativeSourceMatrix, double lineContrast, int stepCount)
+        public async Task<List<Line>> BuildRoute(SectorPoint start, PixelMatrix pixelMatrix, double lineContrast, int stepCount)
         {
             if (!NodesAndPaths.TryGetValue(start, out var paths))
                 throw new Exception("Не найдена стартовая вершина маршрута!");
@@ -97,14 +121,13 @@
             List<Line> route = [];
             for (int step = 0; step < stepCount; step++)
             {
-                var line = await FindNextLine(start, route, negativeSourceMatrix);
+                var line = await FindNextLine(start, route, pixelMatrix.Values);
                 route.Add(line);
                 foreach (var p in line.Points)
                 {
-                    negativeSourceMatrix[p.X, p.Y] -= lineContrast;
-
+                    pixelMatrix.Values[p.X, p.Y] -= lineContrast;
                 }
-                start = line.Points.Last();
+                start = line.End;
             }
             return route;
         }
@@ -115,7 +138,7 @@
         /// </summary>
         /// <param name="start">Вершина из которой выполняется поиск</param>
         /// <returns></returns>
-        private async Task<Line> FindNextLine(PixelPoint start, List<Line> route, double[,] negativeSourceMatrix)
+        private async Task<Line> FindNextLine(SectorPoint start, List<Line> route, double[,] negativeSourceMatrix)
         {
             double maxTotal = double.MinValue;
             Line bestPath = NodesAndPaths[start].First();
@@ -147,43 +170,12 @@
             return bestPath;
         }
 
-        public PixelPoint SelectBeginPoint()
+        public SectorPoint SelectBeginPoint()
         {
             var keys = NodesAndPaths.Keys.ToList();
             return keys[new Random().Next(NodesAndPaths.Count)];
         }
 
-        /// <summary>
-        /// Проецирует маршрут линий на матрицу отрисовки
-        /// </summary>
-        /// <param name="route">Маршрут</param>
-        /// <returns>Матрица отрисовки</returns>
-        public async Task<double[,]> RenderRoute(List<Line> route)
-        {
-            double[,] renderingMatrix = new double[Width, Height];
-            for (int i = 0; i < Width; i++)
-                for (int j = 0; j < Height; j++)
-                    renderingMatrix[i, j] = 0;
-
-            double maxValue = 0;
-            foreach (var line in route)
-            {
-                foreach (var point in line.Points)
-                {
-                    var value = renderingMatrix[point.X, point.Y] + 1;
-                    if (point.X != 0 && point.X != Width - 1 && point.Y != 0 && point.Y !=  Height - 1) // Пропускаем вершины, как самые плотные узлы
-                        maxValue = Math.Max(maxValue, value);
-                    renderingMatrix[point.X, point.Y] += 1;
-                }
-            }
-
-            // Нормализуем до битовых значений
-            for (int i = 0; i < Width; i++)
-                for (int j = 0; j < Height; j++)
-                {
-                    renderingMatrix[i, j] = 255 * Math.Clamp(renderingMatrix[i, j], 0, 255) / maxValue;
-                }
-            return renderingMatrix;
-        }
+        
     }
 }
