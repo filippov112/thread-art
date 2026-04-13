@@ -35,7 +35,7 @@ namespace Infrastructure
                 await File.WriteAllLinesAsync(Path.Combine(directory, uniqueName), []);
                 return uniqueName;
             }
-            List<string> points = [route[0].Start.ToString(), ..route.Select(l => l.End.ToString())];
+            List<string> points = [route[0].Start.ToString(), .. route.Select(l => l.End.ToString())];
             await File.WriteAllLinesAsync(Path.Combine(directory, uniqueName), points);
             return uniqueName;
         }

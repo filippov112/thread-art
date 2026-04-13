@@ -1,6 +1,4 @@
-﻿using System.Collections;
-
-namespace Domain.Models
+﻿namespace Domain.Models
 {
     public class RouteMatrix
     {
@@ -51,7 +49,7 @@ namespace Domain.Models
             }
 
             // Генерируем маршруты
-            
+
             foreach (var startSector in sidePoints)
             {
                 NodesAndPaths[startSector] = [];
@@ -99,8 +97,8 @@ namespace Domain.Models
         private async Task<double> CalcContrast(double[,] matrix)
         {
             double maxValue = 0;
-            for(int i = 0; i < matrix.GetLength(0); i++)
-                for(int j = 0; j < matrix.GetLength(1); j ++)
+            for (int i = 0; i < matrix.GetLength(0); i++)
+                for (int j = 0; j < matrix.GetLength(1); j++)
                     if (i != 0 && i != Width - 1 && j != 0 && j != Height - 1) // Пропускаем вершины, как самые плотные узлы
                         maxValue = Math.Max(maxValue, matrix[i, j]);
             return maxValue;
@@ -183,6 +181,6 @@ namespace Domain.Models
             return keys[new Random().Next(NodesAndPaths.Count)];
         }
 
-        
+
     }
 }

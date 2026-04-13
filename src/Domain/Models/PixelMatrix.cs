@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Domain.Models;
+﻿namespace Domain.Models;
 
 public class PixelMatrix(double[,] values)
 {
-    public int Width { get; } = values.GetLength(0); 
+    public int Width { get; } = values.GetLength(0);
     public int Height { get; } = values.GetLength(1);
     public double[,] Values { get; } = values;
 

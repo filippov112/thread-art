@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Application.Services;
+﻿using Application.Services;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Infrastructure;

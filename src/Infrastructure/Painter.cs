@@ -87,7 +87,7 @@ namespace Infrastructure
             {
                 var color = _colors.TryGetValue(sectorPoint.Sector, out Color value) ? value : Color.Black;
                 var markerBrush = new SolidBrush(color);
-                
+
                 // Рисуем маркер точки (круг) - исправленная версия
                 image.Mutate(ctx => ctx.Fill(
                     new DrawingOptions { GraphicsOptions = new GraphicsOptions { Antialias = true } },

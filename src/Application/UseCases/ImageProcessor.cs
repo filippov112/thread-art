@@ -19,7 +19,7 @@ namespace Application.UseCases
             await progressLogger.SendProgress(5); // Старт
 
             // Построим матрицы
-            var sourcePixelMatrix  = await painter.GetPixelMatrix(Path.Combine(request.Directory, originalImagePath));
+            var sourcePixelMatrix = await painter.GetPixelMatrix(Path.Combine(request.Directory, originalImagePath));
             var routeMatrix = new RouteMatrix(sourcePixelMatrix.Width, sourcePixelMatrix.Height, request.Config.CountPoints);
             await progressLogger.SendProgress(10); // Загрузка изображения завершена
 
