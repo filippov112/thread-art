@@ -1,8 +1,8 @@
 ﻿namespace Domain.Models
 {
-    public struct SizeImage(int width, int height)
+    public readonly struct SizeImage(int width, int height)
     {
-        public int Width = width;
-        public int Height = height;
+        public int Width { get; } = width;
+        public int Height { get; } = height;
     }
 }

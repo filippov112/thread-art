@@ -9,11 +9,11 @@
         /// <summary>
         /// Ширина в пикселях
         /// </summary>
-        public int Width;
+        public int Width { get; }
         /// <summary>
         /// Высота в пикселях
         /// </summary>
-        public int Height;
+        public int Height { get; }
 
 
         public Matrix(int width, int height, int n)
@@ -102,6 +102,7 @@
                 foreach (var p in line.Points)
                 {
                     negativeSourceMatrix[p.X, p.Y] -= lineContrast;
+
                 }
                 start = line.Points.Last();
             }
@@ -170,7 +171,8 @@
                 foreach (var point in line.Points)
                 {
                     var value = renderingMatrix[point.X, point.Y] + 1;
-                    maxValue = Math.Max(maxValue, value);
+                    if (point.X != 0 && point.X != Width - 1 && point.Y != 0 && point.Y !=  Height - 1) // Пропускаем вершины, как самые плотные узлы
+                        maxValue = Math.Max(maxValue, value);
                     renderingMatrix[point.X, point.Y] += 1;
                 }
             }
@@ -179,7 +181,7 @@
             for (int i = 0; i < Width; i++)
                 for (int j = 0; j < Height; j++)
                 {
-                    renderingMatrix[i, j] = 255 * renderingMatrix[i, j] / maxValue;
+                    renderingMatrix[i, j] = 255 * Math.Clamp(renderingMatrix[i, j], 0, 255) / maxValue;
                 }
             return renderingMatrix;
         }

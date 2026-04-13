@@ -2,7 +2,7 @@
 {
     public class Line(PixelPoint A, PixelPoint B)
     {
-        public List<PixelPoint> Points = GetBresenhamLine(A, B);
+        public List<PixelPoint> Points { get; } = GetBresenhamLine(A, B);
 
         /// <summary>
         /// Вычисляет координаты точек матрицы, лежащие на прямой линии между двумя точками на её краях
@@ -20,12 +20,12 @@
 
             while (true)
             {
-                points.Add(new(x1, y1, A.Number));
                 if (x1 == x2 && y1 == y2)
                 {
-                    points.Last().Number = B.Number;
+                    points.Add(new(x1, y1, B.Number));
                     break;
                 }
+                points.Add(new(x1, y1, A.Number));
                 int e2 = 2 * err;
                 if (e2 > -dy)
                 {

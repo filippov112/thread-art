@@ -8,9 +8,9 @@ namespace Domain.Models
         {
             Number = number;
         }
-        public int X = x;
-        public int Y = y;
-        public int Number;
+        public int X { get; } = x;
+        public int Y { get; } = y;
+        public int Number { get; }
 
         public override bool Equals([NotNullWhen(true)] object? obj)
         {
