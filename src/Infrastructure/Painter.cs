@@ -24,22 +24,34 @@ namespace Infrastructure
 
         private readonly Font _font = SystemFonts.CreateFont("Arial", 8);
 
-        private Image<Rgba32>? _image;
-        public SizeImage? Size => _image != null ? new SizeImage(_image.Width, _image.Height) : null;
-
-
         public async Task<PixelMatrix> GetPixelMatrix(string inputImagePath)
         {
-            _image = await Image.LoadAsync<Rgba32>(inputImagePath);
-            var matrix = new double[_image.Width, _image.Height];
-            for (int x = 0; x < _image.Width; x++)
+            var image = await Image.LoadAsync<Rgba32>(inputImagePath);
+            var matrix = new double[image.Width, image.Height];
+            for (int x = 0; x < image.Width; x++)
             {
-                for (int y = 0; y < _image.Height; y++)
+                for (int y = 0; y < image.Height; y++)
                 {
-                    matrix[x, y] = 255 - (_image[x, y].R + _image[x, y].G + _image[x, y].B) / 3;
+                    matrix[x, y] = 255 - (image[x, y].R + image[x, y].G + image[x, y].B) / 3;
                 }
             }
             return new(matrix);
+        }
+
+        private Image<Rgba32> RestoreImage(RouteMatrix smallmatrix, PixelMatrix largeMatrix)
+        {
+            int padding = (int)(Math.Max(smallmatrix.Width, smallmatrix.Height) * 0.05f);
+            Image<Rgba32> image = new(largeMatrix.Width, largeMatrix.Height, new Rgba32(255, 255, 255, 255));
+
+            for (int x = 0; x < smallmatrix.Width; x++)
+            {
+                for (int y = 0; y < smallmatrix.Height; y++)
+                {
+                    var value = (byte)largeMatrix.Values[x + padding, y + padding];
+                    image[x + padding, y + padding] = new(value, value, value);
+                }
+            }
+            return image;
         }
 
         /// <summary>
@@ -48,63 +60,63 @@ namespace Infrastructure
         /// <param name="values">Значения яркости пикселей (негатив)</param>
         /// <param name="padding">Отступы по краям</param>
         /// <returns></returns>
-        public async Task DrawImage(RouteMatrix matrix, List<Line> route)
+        public async Task<PixelMatrix> DrawImage(RouteMatrix matrix, List<Line> route)
         {
             int padding = (int)(Math.Max(matrix.Width, matrix.Height) * 0.05f);
 
             var values = await matrix.GetRenderImage(route);
-            _image = new(values.GetLength(0) + padding * 2, values.GetLength(1) + padding * 2);
-            for (int i = 0; i < values.GetLength(0); i++)
-                for (int j = 0; j < values.GetLength(1); j++)
+
+            int widthPlus = values.GetLength(0) + padding * 2;
+            int heightPlus = values.GetLength(1) + padding * 2;
+
+            var pixelMatrix = new PixelMatrix(widthPlus, heightPlus);
+            for (int i = 0; i < matrix.Width; i++)
+                for (int j = 0; j < matrix.Height; j++)
                 {
                     int newValue = 255 - (int)values[i, j];
-                    _image[i + padding, j + padding] = new Rgba32((byte)newValue, (byte)newValue, (byte)newValue);
+                    pixelMatrix.Values[i + padding, j + padding] = newValue;
                 }
-
+            return pixelMatrix;
         }
 
-        /// <summary>
-        /// Отрисовывает сетку координат
-        /// </summary>
-        public void DrawCoordinateGrid(RouteMatrix matrix)
+        private Image<Rgba32> DrawCoordinateGrid(RouteMatrix matrix, PixelMatrix pixelMatrix)
         {
+            var image = RestoreImage(matrix, pixelMatrix);
             int padding = (int)(Math.Max(matrix.Width, matrix.Height) * 0.05f);
             foreach (SectorPoint sectorPoint in matrix.NodesAndPaths.Keys)
             {
-                if (_image == null)
-                    return;
                 var color = _colors.TryGetValue(sectorPoint.Sector, out Color value) ? value : Color.Black;
                 var markerBrush = new SolidBrush(color);
-
+                
                 // Рисуем маркер точки (круг) - исправленная версия
-                _image.Mutate(ctx => ctx.Fill(
+                image.Mutate(ctx => ctx.Fill(
                     new DrawingOptions { GraphicsOptions = new GraphicsOptions { Antialias = true } },
                     markerBrush,
                     new EllipsePolygon(new PointF(sectorPoint.Pixel.X + padding, sectorPoint.Pixel.Y + padding), 3f)
                 ));
 
                 // Белая обводка
-                _image.Mutate(ctx => ctx.Draw(
+                image.Mutate(ctx => ctx.Draw(
                     new DrawingOptions { GraphicsOptions = new GraphicsOptions { Antialias = true } },
                     Pens.Solid(Color.White, 2),
                     new EllipsePolygon(new PointF(sectorPoint.Pixel.X + padding, sectorPoint.Pixel.Y + padding), 3f)
                 ));
 
                 // Текст
-                _image.Mutate(ctx => ctx.DrawText(new RichTextOptions(_font)
+                image.Mutate(ctx => ctx.DrawText(new RichTextOptions(_font)
                 {
                     Origin = new PointF((sectorPoint.Pixel.X) + 3 + padding, sectorPoint.Pixel.Y + padding), // смещение на 3 пикселя по ширине
                     HorizontalAlignment = HorizontalAlignment.Left,
                     VerticalAlignment = VerticalAlignment.Center
                 }, sectorPoint.ToString(), new SolidBrush(color)));
             }
+            return image;
         }
 
-
-
-        public async Task SaveImage(string path)
+        public async Task SaveImage(string path, RouteMatrix matrix, PixelMatrix pixelMatrix)
         {
-            _image?.Save(path);
+            var image = DrawCoordinateGrid(matrix, pixelMatrix);
+            image.Save(path);
         }
 
         public void Dispose()

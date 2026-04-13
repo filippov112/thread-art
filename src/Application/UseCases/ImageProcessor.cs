@@ -18,24 +18,21 @@ namespace Application.UseCases
             );
 
             // Построим матрицы
-            var pixelMatrix  = await painter.GetPixelMatrix(Path.Combine(request.Directory, originalImagePath));
-            var routeMatrix = new RouteMatrix(pixelMatrix.Width, pixelMatrix.Height, request.Config.CountPoints);
+            var sourcePixelMatrix  = await painter.GetPixelMatrix(Path.Combine(request.Directory, originalImagePath));
+            var routeMatrix = new RouteMatrix(sourcePixelMatrix.Width, sourcePixelMatrix.Height, request.Config.CountPoints);
 
             // Выберем стартовую точку
             var start = routeMatrix.SelectBeginPoint();
 
             // Найдем маршрут
-            var route = await routeMatrix.BuildRoute(start, pixelMatrix, request.Config.ContrastLine, request.Config.CountSteps);
+            var route = await routeMatrix.BuildRoute(start, sourcePixelMatrix, request.Config.ContrastLine, request.Config.CountSteps);
 
             // Перенесем матрицу на изображение
-            await painter.DrawImage(routeMatrix, route);
-
-            // Нанесем координатную сетку
-            painter.DrawCoordinateGrid(routeMatrix);
+            var newPixelMatrix = await painter.DrawImage(routeMatrix, route);
 
             // Сохраним изображение
             string resultImagePath = await saveManager.SaveResultImageAsync("", request.Directory, Path.GetFileName(originalImagePath));
-            await painter.SaveImage(Path.Combine(request.Directory, resultImagePath));
+            await painter.SaveImage(Path.Combine(request.Directory, resultImagePath), routeMatrix, newPixelMatrix);
 
             // Сохраним список координат маршрута
             string routeFilePath = await saveManager.SaveRouteAsync(route, request.Directory, Path.GetFileName(originalImagePath));
