@@ -1,10 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
-
-namespace Domain.Models
+﻿namespace Domain.Models
 {
     public class Config
     {
-        public IFormFile? ImageFile { get; set; }
+        public string Extension { get; set; } = string.Empty;
         public string WebRootPath { get; set; } = string.Empty;
         public string OriginalImagePath { get; set; } = string.Empty;
         public string ResultImagePath { get; set; } = string.Empty;

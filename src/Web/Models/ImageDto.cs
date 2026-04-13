@@ -1,5 +1,3 @@
-using Domain.Models;
-
 public class ImageDto
 {
     public IFormFile? ImageFile { get; set; }

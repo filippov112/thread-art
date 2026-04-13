@@ -19,7 +19,7 @@ public class FileCleanupService : BackgroundService
         while (!stoppingToken.IsCancellationRequested)
         {
             _logger.LogInformation("Запуск очистки файлов...");
-            CleanupOldFiles(config["FolderPath"] ?? "/images", float.Parse(config["FileAgeHours"]?.Replace('.',',') ?? "1"));
+            CleanupOldFiles(config["FolderPath"] ?? "/images", float.Parse(config["FileAgeHours"]?.Replace('.', ',') ?? "1"));
             _logger.LogInformation("Очистка завершена.");
             await Task.Delay(TimeSpan.FromHours(double.Parse(config["CleanupIntervalHours"] ?? "1", System.Globalization.CultureInfo.InvariantCulture)), stoppingToken);
         }
@@ -32,7 +32,7 @@ public class FileCleanupService : BackgroundService
             _logger.LogWarning($"Папка {folderPath} не существует.");
             return;
         }
-        
+
         var files = Directory.GetFiles(_env.WebRootPath + folderPath);
         foreach (var file in files)
         {

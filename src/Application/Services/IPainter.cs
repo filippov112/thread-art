@@ -1,11 +1,8 @@
 ﻿using Domain.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Application.Services
 {
-    public interface IPainter: IDisposable
+    public interface IPainter : IDisposable
     {
         public Task<double[,]> GetImageGrayNegativeMatrix(string inputImagePath);
         public SizeImage? Size { get; }

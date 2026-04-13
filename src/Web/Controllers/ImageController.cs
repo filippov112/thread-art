@@ -27,11 +27,12 @@ public class ImageController(ImageHandling imageService, IWebHostEnvironment env
 
             config.ResultImagePath = Path.Combine(config.WebRootPath, outputImagePath);
             config.ResultRoutePath = Path.Combine(config.WebRootPath, routeFilePath);
+            config.Extension = Path.GetExtension(parameters.ImageFile.FileName);
             config.ContrastLine = parameters.ContrastLine;
             config.CountSteps = parameters.CountSteps;
             config.CountPoints = parameters.CountPoints;
 
-            await _imageService.ProcessImage(parameters.ImageFile, config);
+            await _imageService.ProcessImage(parameters.ImageFile.OpenReadStream(), config);
 
             parameters.OriginalImagePath = Path.Combine("/Images", Path.GetFileName(config.OriginalImagePath));
             parameters.ResultImagePath = Path.Combine("/Images", outputImagePath);

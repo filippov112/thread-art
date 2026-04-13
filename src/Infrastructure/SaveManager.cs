@@ -1,21 +1,18 @@
 using Application.Services;
 using Domain.Models;
-using Microsoft.AspNetCore.Http;
 
 namespace Infrastructure
 {
     public class SaveManager : ISaveManager
     {
-        public async Task<string> SaveImageAsync(IFormFile file, Config config)
+        public async Task<string> SaveImageAsync(Stream fileStream, Config config)
         {
 
-            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-            var filePath = Path.Combine(config.WebRootPath, fileName);
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
-            }
+            var newName = $"{Guid.NewGuid()}{config.Extension}";
+            var filePath = Path.Combine(config.WebRootPath, newName);
+            using var stream = new FileStream(filePath, FileMode.Create);
 
+            await fileStream.CopyToAsync(stream);
             return filePath;
         }
 

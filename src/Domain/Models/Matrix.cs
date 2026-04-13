@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Domain.Models
+﻿namespace Domain.Models
 {
     public class Matrix
     {
@@ -24,7 +20,7 @@ namespace Domain.Models
         {
             Width = width;
             Height = height;
-            
+
             CreatePathDictionary(n);
         }
         /// <summary>
@@ -82,7 +78,7 @@ namespace Domain.Models
                 sectorLetter = 'T';
             if (p.Y == Height - 1)
                 sectorLetter = 'B';
-            return new(sectorLetter, p.Number, new(p.X + padding, p.Y + padding)); 
+            return new(sectorLetter, p.Number, new(p.X + padding, p.Y + padding));
         }
 
 

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Text;
-using System.Xml.Linq;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace Domain.Models
 {
@@ -12,7 +8,7 @@ namespace Domain.Models
         {
             Number = number;
         }
-        public int X = x; 
+        public int X = x;
         public int Y = y;
         public int Number;
 

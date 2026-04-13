@@ -36,7 +36,7 @@ namespace Infrastructure
             {
                 for (int y = 0; y < _image.Height; y++)
                 {
-                    matrix[x, y] = 255 - (_image[x, y].R + _image[x, y].R + _image[x, y].R) / 3;
+                    matrix[x, y] = 255 - (_image[x, y].R + _image[x, y].G + _image[x, y].B) / 3;
                 }
             }
             return matrix;
@@ -52,7 +52,7 @@ namespace Infrastructure
         {
             _image = new(values.GetLength(0) + padding * 2, values.GetLength(1) + padding * 2);
             for (int i = 0; i < values.GetLength(0); i++)
-                for(int j = 0;  j < values.GetLength(1); j++)
+                for (int j = 0; j < values.GetLength(1); j++)
                 {
                     int newValue = 255 - (int)values[i, j];
                     _image[i + padding, j + padding] = new Rgba32((byte)newValue, (byte)newValue, (byte)newValue);
@@ -95,7 +95,7 @@ namespace Infrastructure
             }, point.ToString(), new SolidBrush(color)));
         }
 
-        
+
 
         public async Task SaveImage(string path)
         {

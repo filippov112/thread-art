@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Application.Services
+﻿namespace Application.Services
 {
     /// <summary>
     /// Сервис передачи уведомлений на сторону клиента о прогрессе выполнения обработки

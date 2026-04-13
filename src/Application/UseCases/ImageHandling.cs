@@ -2,15 +2,14 @@
 
 using Application.Services;
 using Domain.Models;
-using Microsoft.AspNetCore.Http;
 
 namespace Application.UseCases
 {
     public class ImageHandling(ISaveManager saveManager, IPainter painter)
     {
-        public async Task ProcessImage(IFormFile file, Config config)
+        public async Task ProcessImage(Stream fileStream, Config config)
         {
-            config.OriginalImagePath = await saveManager.SaveImageAsync(file, config);
+            config.OriginalImagePath = await saveManager.SaveImageAsync(fileStream, config);
 
             // Получим данные об изображении
             double[,] gray_negative_matrix = await painter.GetImageGrayNegativeMatrix(config.OriginalImagePath);
@@ -18,10 +17,10 @@ namespace Application.UseCases
 
             // Построим матрицу
             var matrix = new Matrix(size.Width, size.Height, config.CountPoints);
-            
+
             // Выберем стартовую точку
             var start = matrix.SelectBeginPoint();
-            
+
             // Найдем маршрут
             var route = await matrix.BuildRoute(start, gray_negative_matrix, config.ContrastLine, config.CountSteps);
 
@@ -43,7 +42,7 @@ namespace Application.UseCases
                 var sectorPoint = matrix.ConvertToCoordinate(point, padding);
                 painter.DrawCoordinate(sectorPoint);
             }
-                    
+
             // Сохраним изображение
             await painter.SaveImage(config.ResultImagePath);
 
