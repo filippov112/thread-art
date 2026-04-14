@@ -1,11 +1,24 @@
+using Application.DTO;
 using Application.UseCases;
-using Domain.Models;
 using Microsoft.AspNetCore.Mvc;
+using Web.Interfaces;
 
-public class ImageController(ImageProcessor imageService, IWebHostEnvironment env) : Controller
+namespace Web.Controllers;
+
+public class ImageController : Controller
 {
-    private readonly ImageProcessor _imageService = imageService;
-    private readonly IWebHostEnvironment _env = env;
+    private readonly ImageProcessor _imageService;
+    private readonly IWebHostEnvironment _env;
+    private readonly IStreamController _streamController;
+    private readonly IPathManager _pathManager;
+
+    public ImageController(ImageProcessor imageService, IWebHostEnvironment env, IStreamController streamController, IPathManager pathManager)
+    {
+        _imageService = imageService;
+        _env = env;
+        _streamController = streamController;
+        _pathManager = pathManager;
+    }
 
     [HttpPost]
     public async Task<IActionResult> UploadImage(ResultViewModel data)
@@ -13,34 +26,40 @@ public class ImageController(ImageProcessor imageService, IWebHostEnvironment en
         if (data.ImageFile == null || data.ImageFile.Length == 0)
             return View("Index", data);
 
-        var request = new ProcessImageRequest
+        _pathManager.InitNamesAndPaths(_env.WebRootPath, data.ImageFile.FileName);
+
+        var viewModel = new ResultViewModel
         {
-            ImageStream = data.ImageFile.OpenReadStream(),
-            FileName = data.ImageFile.FileName,
-            Directory = _env.WebRootPath,
-            Config = new Config
-            {
-                CountPoints = data.CountPoints,
-                CountSteps = data.CountSteps,
-                ContrastLine = data.ContrastLine
-            }
+            OriginalImagePath = _pathManager.OriginalImagePathVM,
+            ResultImagePath = _pathManager.ResultImagePathVM,
+            ResultRoutePath = _pathManager.ResultRouteFilePathVM,
+
+            CountPoints = data.CountPoints,
+            CountSteps = data.CountSteps,
+            ContrastLine = data.ContrastLine
         };
 
         try
         {
-            var result = await _imageService.ProcessImageAsync(request);
-
-            var viewModel = new ResultViewModel
+            using (var memoryStream = new MemoryStream())
             {
-                OriginalImagePath = '/' + result.OriginalImagePath,
-                ResultImagePath = '/' + result.ResultImagePath,
-                ResultRoutePath = '/' + result.RouteFilePath,
+                await data.ImageFile.CopyToAsync(memoryStream);
+                memoryStream.Position = 0;
+                await _streamController.SaveFromMemory(_pathManager.OriginalImagePath, memoryStream);
+                using var resultImageStream = _streamController.MakeStream(_pathManager.ResultImagePath);
+                using var resultRouteStream = _streamController.MakeStream(_pathManager.ResultRouteFilePath);
 
-                CountPoints = request.Config.CountPoints,
-                CountSteps = request.Config.CountSteps,
-                ContrastLine = request.Config.ContrastLine
-            };
-
+                var request = new ProcessingRequest
+                {
+                    OriginalImageStream = memoryStream,
+                    ResultImageStream = resultImageStream,
+                    ResultRouteStream = resultRouteStream,
+                    CountPoints = data.CountPoints,
+                    CountSteps = data.CountSteps,
+                    ContrastLine = data.ContrastLine
+                };
+                await _imageService.ProcessImageAsync(request);
+            }
             return View("Result", viewModel);
         }
         catch (Exception ex)

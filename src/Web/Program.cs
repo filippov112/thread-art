@@ -1,13 +1,16 @@
-using Application.Services;
+using Application.Interfaces;
 using Application.UseCases;
 using Infrastructure;
+using Web.Interfaces;
+using Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddTransient<ImageProcessor>();
 builder.Services.AddTransient<IPainter, Painter>();
-builder.Services.AddTransient<ISaveManager, SaveManager>();
+builder.Services.AddTransient<IPathManager, PathManager>();
+builder.Services.AddTransient<IStreamController, StreamController>();
 builder.Services.AddTransient<IProgressLogger, ProgressLoggerAdapter>();
 builder.Services.AddHostedService<FileCleanupService>();
 

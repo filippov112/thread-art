@@ -1,4 +1,6 @@
-﻿namespace Application.Services
+﻿using Domain.Enums;
+
+namespace Application.Interfaces
 {
     /// <summary>
     /// Сервис передачи уведомлений на сторону клиента о прогрессе выполнения обработки
@@ -8,8 +10,6 @@
         /// <summary>
         /// Отправить новое значение
         /// </summary>
-        /// <param name="progress">Значение прогресса в %</param>
-        /// <returns></returns>
-        public Task SendProgress(int progress);
+        public Task SendProgressAsync(ProgressStage stage);
     }
 }

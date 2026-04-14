@@ -4,7 +4,7 @@ namespace Infrastructure
 {
     public class ProgressHub : Hub
     {
-        public async Task SendProgress(int progress)
+        public async Task SendProgressAsync(int progress)
         {
             await Clients.All.SendAsync("ReceiveProgress", progress);
         }

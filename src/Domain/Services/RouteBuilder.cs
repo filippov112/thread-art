@@ -1,0 +1,74 @@
+﻿using Domain.Models;
+
+namespace Domain.Services;
+
+public class RouteBuilder(RouteMatrix matrix)
+{
+    /// <summary>
+    /// Строит маршрут линий
+    /// </summary>
+    /// <param name="start">Стартовая вершина</param>
+    /// <param name="negativeSourceMatrix">Матрица яркости пикселей исходного изображения (в негативе)</param>
+    /// <param name="lineContrast">Значение контрастности линий при отрисовке</param>
+    /// <returns>Маршрут (последовательный список линий)</returns>
+    public void FillRoute(Route route, PixelMatrix originalImage, double lineContrast, int stepCount)
+    {
+        var start = route.Start;
+        for (int step = 0; step < stepCount; step++)
+        {
+
+            var line = FindNextLine(start, route, originalImage);
+            route.Lines.Add(line);
+            foreach (var p in line.Points)
+            {
+                originalImage.Values[p.X, p.Y] += lineContrast;
+                if (p.X > 0 && p.X < originalImage.Width - 1 && p.Y > 0 && p.Y < originalImage.Height - 1)
+                {
+                    originalImage.Values[p.X + 1, p.Y + 1] += lineContrast / 3;
+                    originalImage.Values[p.X + 1, p.Y] += lineContrast / 3;
+                    originalImage.Values[p.X + 1, p.Y - 1] += lineContrast / 3;
+                    originalImage.Values[p.X - 1, p.Y] += lineContrast / 3;
+                    originalImage.Values[p.X - 1, p.Y - 1] += lineContrast / 3;
+                    originalImage.Values[p.X - 1, p.Y + 1] += lineContrast / 3;
+                    originalImage.Values[p.X, p.Y + 1] += lineContrast / 3;
+                    originalImage.Values[p.X, p.Y - 1] += lineContrast / 3;
+                }
+
+            }
+            start = line.End;
+        }
+    }
+
+    private Line FindNextLine(SectorPoint start, Route route, PixelMatrix originalImage)
+    {
+        double minValue = double.MaxValue;
+        Line bestPath = matrix.Paths[start].First();
+
+        foreach (var path in matrix.Paths[start])
+        {
+            double sum = 0;
+            int count = 0;
+
+            foreach (var p in path.Points)
+            {
+                sum += originalImage.Values[p.X, p.Y];
+                count++;
+            }
+
+            if (count > 0)
+            {
+                double avgProb = sum / count;
+                // Запрещаем возвращаться по тому же маршруту
+                if (route.Lines.Count > 0 && route.Lines.Last().IsRevert(path))
+                    continue;
+                if (avgProb < minValue)
+                {
+                    minValue = avgProb;
+                    bestPath = path;
+                }
+            }
+        }
+        return bestPath;
+    }
+
+}

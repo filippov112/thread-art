@@ -4,16 +4,16 @@ namespace Domain.Models
 {
     public struct SectorPoint
     {
-        public SectorPoint(PixelPoint pixel, SizeImage size)
+        public SectorPoint(PixelPoint pixel, int width, int height)
         {
             Sector = 'U';
             if (pixel.X == 0)
                 Sector = 'L';
-            if (pixel.X == size.Width - 1)
+            if (pixel.X == width - 1)
                 Sector = 'R';
             if (pixel.Y == 0)
                 Sector = 'T';
-            if (pixel.Y == size.Height - 1)
+            if (pixel.Y == height - 1)
                 Sector = 'B';
             Pixel = pixel;
         }

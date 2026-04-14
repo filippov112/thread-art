@@ -3,10 +3,11 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http.Connections" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Connections.Common" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR"  />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR" />
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="SixLabors.ImageSharp" />
-    <PackageReference Include="SixLabors.ImageSharp.Drawing"  />
+    <PackageReference Include="SixLabors.ImageSharp.Drawing" />
+    <PackageReference Include="System.Drawing.Common" />
   </ItemGroup>
 
   <ItemGroup>

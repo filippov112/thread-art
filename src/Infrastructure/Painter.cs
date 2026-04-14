@@ -1,9 +1,10 @@
-﻿using Application.Services;
+﻿using Application.Interfaces;
 using Domain.Models;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Drawing.Processing;
+using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 
@@ -11,6 +12,7 @@ namespace Infrastructure
 {
     public class Painter : IPainter
     {
+        #region Settings
         // Цвета для разных секторов/сторон
         private readonly Dictionary<char, Color> _colors = new() {
                 {'A', Color.Red},
@@ -23,67 +25,44 @@ namespace Infrastructure
             };
 
         private readonly Font _font = SystemFonts.CreateFont("Arial", 8);
+        #endregion
 
-        public async Task<PixelMatrix> GetPixelMatrix(string inputImagePath)
+        #region API
+        public async Task<PixelData[,]> GetPixelMatrixAsync(Stream originalImageStream)
         {
-            var image = await Image.LoadAsync<Rgba32>(inputImagePath);
-            var matrix = new double[image.Width, image.Height];
+            using var image = await Image.LoadAsync<Rgba32>(originalImageStream);
+            var matrix = new PixelData[image.Width, image.Height];
             for (int x = 0; x < image.Width; x++)
-            {
                 for (int y = 0; y < image.Height; y++)
-                {
-                    matrix[x, y] = 255 - (image[x, y].R + image[x, y].G + image[x, y].B) / 3;
-                }
-            }
-            return new(matrix);
+                    matrix[x, y] = new(image[x, y].R, image[x, y].G, image[x, y].B);
+            return matrix;
         }
 
-        private Image<Rgba32> RestoreImage(RouteMatrix smallmatrix, PixelMatrix largeMatrix)
+        public async Task SaveImageAsync(Stream resultImageStream, int padding, SectorPoint[] points, double[,] values)
         {
-            int padding = (int)(Math.Max(smallmatrix.Width, smallmatrix.Height) * 0.05f);
-            Image<Rgba32> image = new(largeMatrix.Width, largeMatrix.Height, new Rgba32(255, 255, 255, 255));
+            using var image = DrawCoordinateGrid(padding, points, values);
+            image.Save(resultImageStream, new PngEncoder());
+        }
+        #endregion
 
-            for (int x = 0; x < smallmatrix.Width; x++)
-            {
-                for (int y = 0; y < smallmatrix.Height; y++)
+        #region Tools
+        private Image<Rgba32> RestoreImage(double[,] values)
+        {
+            Image<Rgba32> image = new(values.GetLength(0), values.GetLength(1), new Rgba32(255, 255, 255, 255));
+
+            for (int x = 0; x < image.Width; x++)
+                for (int y = 0; y < image.Height; y++)
                 {
-                    var value = (byte)largeMatrix.Values[x + padding, y + padding];
-                    image[x + padding, y + padding] = new(value, value, value);
+                    var value = (byte)values[x, y];
+                    image[x, y] = new(value, value, value);
                 }
-            }
             return image;
         }
 
-        /// <summary>
-        /// Отрисовывает изображение
-        /// </summary>
-        /// <param name="values">Значения яркости пикселей (негатив)</param>
-        /// <param name="padding">Отступы по краям</param>
-        /// <returns></returns>
-        public async Task<PixelMatrix> DrawImage(RouteMatrix matrix, List<Line> route)
+        private Image<Rgba32> DrawCoordinateGrid(int padding, SectorPoint[] points, double[,] values)
         {
-            int padding = (int)(Math.Max(matrix.Width, matrix.Height) * 0.05f);
-
-            var values = await matrix.GetRenderImage(route);
-
-            int widthPlus = values.GetLength(0) + padding * 2;
-            int heightPlus = values.GetLength(1) + padding * 2;
-
-            var pixelMatrix = new PixelMatrix(widthPlus, heightPlus);
-            for (int i = 0; i < matrix.Width; i++)
-                for (int j = 0; j < matrix.Height; j++)
-                {
-                    int newValue = 255 - (int)values[i, j];
-                    pixelMatrix.Values[i + padding, j + padding] = newValue;
-                }
-            return pixelMatrix;
-        }
-
-        private Image<Rgba32> DrawCoordinateGrid(RouteMatrix matrix, PixelMatrix pixelMatrix)
-        {
-            var image = RestoreImage(matrix, pixelMatrix);
-            int padding = (int)(Math.Max(matrix.Width, matrix.Height) * 0.05f);
-            foreach (SectorPoint sectorPoint in matrix.NodesAndPaths.Keys)
+            var image = RestoreImage(values);
+            foreach (SectorPoint sectorPoint in points)
             {
                 var color = _colors.TryGetValue(sectorPoint.Sector, out Color value) ? value : Color.Black;
                 var markerBrush = new SolidBrush(color);
@@ -113,11 +92,7 @@ namespace Infrastructure
             return image;
         }
 
-        public async Task SaveImage(string path, RouteMatrix matrix, PixelMatrix pixelMatrix)
-        {
-            var image = DrawCoordinateGrid(matrix, pixelMatrix);
-            image.Save(path);
-        }
+        #endregion
 
         public void Dispose()
         {

@@ -1,4 +1,5 @@
-﻿using Application.Services;
+﻿using Application.Interfaces;
+using Domain.Enums;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Infrastructure;
@@ -12,9 +13,9 @@ public class ProgressLoggerAdapter : IProgressLogger
         _hubContext = hubContext;
     }
 
-    public async Task SendProgress(int progress)
+    public async Task SendProgressAsync(ProgressStage stage)
     {
         // Отправляем всем подключенным клиентам
-        await _hubContext.Clients.All.SendAsync("ReceiveProgress", progress);
+        await _hubContext.Clients.All.SendAsync("ReceiveProgress", (int)stage);
     }
 }
