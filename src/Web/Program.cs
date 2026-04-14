@@ -1,4 +1,5 @@
 using Application.Interfaces;
+using Application.Services;
 using Application.UseCases;
 using Infrastructure;
 using Web.Interfaces;
@@ -10,6 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddTransient<ImageProcessor>();
 builder.Services.AddTransient<IPainter, Painter>();
 builder.Services.AddTransient<IPathManager, PathManager>();
+builder.Services.AddTransient<IRouteRenderer, RouteRenderer>();
 builder.Services.AddTransient<IStreamController, StreamController>();
 builder.Services.AddTransient<IProgressLogger, ProgressLoggerAdapter>();
 builder.Services.AddHostedService<FileCleanupService>();

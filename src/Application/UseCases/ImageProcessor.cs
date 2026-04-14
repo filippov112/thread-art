@@ -7,7 +7,7 @@ using Domain.Services;
 
 namespace Application.UseCases
 {
-    public class ImageProcessor(IPainter painter, IProgressLogger progressLogger)
+    public class ImageProcessor(IPainter painter, IProgressLogger progressLogger, IRouteRenderer routeRenderer)
     {
         public async Task ProcessImageAsync(ProcessingRequest request)
         {
@@ -28,8 +28,7 @@ namespace Application.UseCases
             await progressLogger.SendProgressAsync(Domain.Enums.ProgressStage.Calculated);
 
             // Нанесем маршрут на изображение
-            var resultPixelMatrix = new PixelMatrix(originalPixelMatrix.Width, originalPixelMatrix.Height, route, request.Padding);
-
+            var resultPixelMatrix = routeRenderer.RenderRoute(route, request.Padding, originalPixelMatrix.Width, originalPixelMatrix.Height);
 
             // Запишем данные в результирующие потоки
             await painter.SaveImageAsync(request.ResultImageStream, request.Padding, routeMatrix.Points, resultPixelMatrix.Values);
