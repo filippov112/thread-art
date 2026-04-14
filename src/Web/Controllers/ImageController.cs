@@ -39,33 +39,50 @@ public class ImageController : Controller
             ContrastLine = data.ContrastLine
         };
 
+        // Объявляем переменные потоков
+        Stream? originalStream = null;
+        Stream? resultImageStream = null;
+        Stream? resultRouteStream = null;
+
         try
         {
-            using (var memoryStream = new MemoryStream())
-            {
-                await data.ImageFile.CopyToAsync(memoryStream);
-                memoryStream.Position = 0;
-                await _streamController.SaveFromMemory(_pathManager.OriginalImagePath, memoryStream);
-                using var resultImageStream = _streamController.MakeStream(_pathManager.ResultImagePath);
-                using var resultRouteStream = _streamController.MakeStream(_pathManager.ResultRouteFilePath);
+            // 1. Копируем входящий файл в память
+            using var memoryStream = new MemoryStream();
+            await data.ImageFile.CopyToAsync(memoryStream);
+            memoryStream.Position = 0;
 
-                var request = new ProcessingRequest
-                {
-                    OriginalImageStream = memoryStream,
-                    ResultImageStream = resultImageStream,
-                    ResultRouteStream = resultRouteStream,
-                    CountPoints = data.CountPoints,
-                    CountSteps = data.CountSteps,
-                    ContrastLine = data.ContrastLine
-                };
-                await _imageService.ProcessImageAsync(request);
-            }
+            // Сохраняем исходник на диск
+            await _streamController.SaveFromMemory(_pathManager.OriginalImagePath, memoryStream);
+
+            // 2. Создаем выходные потоки
+            originalStream = memoryStream;
+            resultImageStream = _streamController.MakeStream(_pathManager.ResultImagePath);
+            resultRouteStream = _streamController.MakeStream(_pathManager.ResultRouteFilePath);
+
+            // 3. Формируем запрос и запускаем процессор
+            var request = new ProcessingRequest
+            {
+                OriginalImageStream = originalStream,
+                ResultImageStream = resultImageStream,
+                ResultRouteStream = resultRouteStream,
+                CountPoints = data.CountPoints,
+                CountSteps = data.CountSteps,
+                ContrastLine = data.ContrastLine
+            };
+            await _imageService.ProcessImageAsync(request);
+
             return View("Result", viewModel);
         }
         catch (Exception ex)
         {
             ModelState.AddModelError("", "Ошибка обработки изображения: " + ex.Message);
             return View("Index", new ResultViewModel());
+        }
+        finally
+        {
+            originalStream?.Dispose();
+            resultImageStream?.Dispose();
+            resultRouteStream?.Dispose();
         }
     }
 
