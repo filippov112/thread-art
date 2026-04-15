@@ -34,9 +34,9 @@ public class PathManager : IPathManager
         string resultImageName = Guid.NewGuid().ToString() + ".png";
         string resultRouteFileName = Guid.NewGuid().ToString() + ".txt";
 
-        OriginalImagePathVM = '/' + Path.Combine(_storagePath, originalImageName);
-        ResultImagePathVM = '/' + Path.Combine(_storagePath, resultImageName);
-        ResultRouteFilePathVM = '/' + Path.Combine(_storagePath, resultRouteFileName);
+        OriginalImagePathVM = "/" + string.Join("/", _storagePath, originalImageName);
+        ResultImagePathVM = "/" + string.Join("/", _storagePath, resultImageName);
+        ResultRouteFilePathVM = "/" + string.Join("/", _storagePath, resultRouteFileName);
 
         OriginalImagePath = Path.Combine(webRootPath, _storagePath, originalImageName);
         ResultImagePath = Path.Combine(webRootPath, _storagePath, resultImageName);

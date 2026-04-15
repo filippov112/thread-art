@@ -1,11 +1,16 @@
+using System.ComponentModel.DataAnnotations;
 using Application.DTO;
 using Application.UseCases;
 using Microsoft.AspNetCore.Mvc;
 using Web.Interfaces;
+using Web.Models;
 
 namespace Web.Controllers;
 
-public class ImageController : Controller
+[ApiController]
+[Route("api/[controller]")]
+[Produces("application/json")]
+public class ImageController : ControllerBase
 {
     private readonly ImageProcessor _imageService;
     private readonly IWebHostEnvironment _env;
@@ -20,24 +25,22 @@ public class ImageController : Controller
         _pathManager = pathManager;
     }
 
-    [HttpPost]
-    public async Task<IActionResult> UploadImage(ResultViewModel data)
+    [HttpPost("upload")]
+    [ProducesResponseType(typeof(ResultDTO), 200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult<ResultDTO>> UploadImage(
+        [Required] IFormFile imageFile,
+        [Range(1, 2000)] int countPoints = 240,
+        [Range(1, 50000)] int countSteps = 4000,
+        [Range(0.1, 100.0)] double contrastLine = 15)
     {
-        if (data.ImageFile == null || data.ImageFile.Length == 0)
-            return View("Index", data);
-
-        _pathManager.InitNamesAndPaths(_env.WebRootPath, data.ImageFile.FileName);
-
-        var viewModel = new ResultViewModel
+        if (imageFile == null || imageFile.Length == 0)
         {
-            OriginalImagePath = _pathManager.OriginalImagePathVM,
-            ResultImagePath = _pathManager.ResultImagePathVM,
-            ResultRoutePath = _pathManager.ResultRouteFilePathVM,
+            return BadRequest("Файл изображения не предоставлен.");
+        }
 
-            CountPoints = data.CountPoints,
-            CountSteps = data.CountSteps,
-            ContrastLine = data.ContrastLine
-        };
+        _pathManager.InitNamesAndPaths(_env.WebRootPath, imageFile.FileName);
 
         // Объявляем переменные потоков
         Stream? originalStream = null;
@@ -48,7 +51,7 @@ public class ImageController : Controller
         {
             // 1. Копируем входящий файл в память
             using var memoryStream = new MemoryStream();
-            await data.ImageFile.CopyToAsync(memoryStream);
+            await imageFile.CopyToAsync(memoryStream);
             memoryStream.Position = 0;
 
             // Сохраняем исходник на диск
@@ -65,18 +68,28 @@ public class ImageController : Controller
                 OriginalImageStream = originalStream,
                 ResultImageStream = resultImageStream,
                 ResultRouteStream = resultRouteStream,
-                CountPoints = data.CountPoints,
-                CountSteps = data.CountSteps,
-                ContrastLine = data.ContrastLine
+                CountPoints = countPoints,
+                CountSteps = countSteps,
+                ContrastLine = contrastLine
             };
             await _imageService.ProcessImageAsync(request);
 
-            return View("Result", viewModel);
+            resultImageStream?.Close();
+            resultRouteStream?.Close();
+
+            var viewModel = new ResultDTO
+            {
+                OriginalImagePath = _pathManager.OriginalImagePathVM,
+                ResultImagePath = _pathManager.ResultImagePathVM,
+                ResultRoutePath = _pathManager.ResultRouteFilePathVM,
+            };
+
+            return Ok(viewModel);
         }
         catch (Exception ex)
         {
-            ModelState.AddModelError("", "Ошибка обработки изображения: " + ex.Message);
-            return View("Index", new ResultViewModel());
+            //ModelState.AddModelError("", "Ошибка обработки изображения: " + ex.Message);
+            return StatusCode(500, $"Внутренняя ошибка сервера: {ex.Message}");
         }
         finally
         {
@@ -86,9 +99,10 @@ public class ImageController : Controller
         }
     }
 
-    [HttpGet]
-    public IActionResult Index()
+    [HttpGet("info")]
+    [ProducesResponseType(typeof(string), 200)]
+    public ActionResult<string> GetInfo()
     {
-        return View(new ResultViewModel());
+        return Ok("API для обработки изображений Thread Art");
     }
 }

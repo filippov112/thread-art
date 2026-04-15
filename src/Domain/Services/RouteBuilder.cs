@@ -22,18 +22,6 @@ public class RouteBuilder(RouteMatrix matrix)
             foreach (var p in line.Points)
             {
                 originalImage.Values[p.X, p.Y] += lineContrast;
-                if (p.X > 0 && p.X < originalImage.Width - 1 && p.Y > 0 && p.Y < originalImage.Height - 1)
-                {
-                    originalImage.Values[p.X + 1, p.Y + 1] += lineContrast / 3;
-                    originalImage.Values[p.X + 1, p.Y] += lineContrast / 3;
-                    originalImage.Values[p.X + 1, p.Y - 1] += lineContrast / 3;
-                    originalImage.Values[p.X - 1, p.Y] += lineContrast / 3;
-                    originalImage.Values[p.X - 1, p.Y - 1] += lineContrast / 3;
-                    originalImage.Values[p.X - 1, p.Y + 1] += lineContrast / 3;
-                    originalImage.Values[p.X, p.Y + 1] += lineContrast / 3;
-                    originalImage.Values[p.X, p.Y - 1] += lineContrast / 3;
-                }
-
             }
             start = line.End;
         }

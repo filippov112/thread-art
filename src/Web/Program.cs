@@ -2,6 +2,7 @@ using Application.Interfaces;
 using Application.Services;
 using Application.UseCases;
 using Infrastructure;
+using Scalar.AspNetCore;
 using Web.Interfaces;
 using Web.Services;
 
@@ -17,16 +18,24 @@ builder.Services.AddTransient<IProgressLogger, ProgressLoggerAdapter>();
 builder.Services.AddHostedService<FileCleanupService>();
 
 builder.Services.AddSignalR();
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+}
+else
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+    app.MapSwagger("/openapi/{documentName}.json");
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();
@@ -37,8 +46,5 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapHub<ProgressHub>("/progressHub");
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Image}/{action=Index}/{id?}");
-
+app.MapControllers();
 app.Run();
