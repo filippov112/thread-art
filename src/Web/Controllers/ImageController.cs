@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using Application.DTO;
 using Application.UseCases;
+using Domain.Models;
 using Microsoft.AspNetCore.Mvc;
-using Web.Interfaces;
 using Web.Models;
 
 namespace Web.Controllers;
@@ -13,16 +13,10 @@ namespace Web.Controllers;
 public class ImageController : ControllerBase
 {
     private readonly ImageProcessor _imageService;
-    private readonly IWebHostEnvironment _env;
-    private readonly IStreamController _streamController;
-    private readonly IPathManager _pathManager;
 
-    public ImageController(ImageProcessor imageService, IWebHostEnvironment env, IStreamController streamController, IPathManager pathManager)
+    public ImageController(ImageProcessor imageService, IWebHostEnvironment env)
     {
         _imageService = imageService;
-        _env = env;
-        _streamController = streamController;
-        _pathManager = pathManager;
     }
 
     [HttpPost("upload")]
@@ -40,50 +34,34 @@ public class ImageController : ControllerBase
             return BadRequest("Файл изображения не предоставлен.");
         }
 
-        _pathManager.InitNamesAndPaths(_env.WebRootPath, imageFile.FileName);
-
-        // Объявляем переменные потоков
+        // Объявляем поток
         Stream? originalStream = null;
-        Stream? resultImageStream = null;
-        Stream? resultRouteStream = null;
 
         try
         {
-            // 1. Копируем входящий файл в память
+            // Копируем входящий файл в память
             using var memoryStream = new MemoryStream();
             await imageFile.CopyToAsync(memoryStream);
             memoryStream.Position = 0;
-
-            // Сохраняем исходник на диск
-            await _streamController.SaveFromMemory(_pathManager.OriginalImagePath, memoryStream);
-
-            // 2. Создаем выходные потоки
             originalStream = memoryStream;
-            resultImageStream = _streamController.MakeStream(_pathManager.ResultImagePath);
-            resultRouteStream = _streamController.MakeStream(_pathManager.ResultRouteFilePath);
 
-            // 3. Формируем запрос и запускаем процессор
+            // Формируем запрос и запускаем процессор
             var request = new ProcessingRequest
             {
-                OriginalImageStream = originalStream,
-                ResultImageStream = resultImageStream,
-                ResultRouteStream = resultRouteStream,
+                FileName = imageFile.FileName,
+                OriginalStream = originalStream,
                 CountPoints = countPoints,
                 CountSteps = countSteps,
                 ContrastLine = contrastLine
             };
-            await _imageService.ProcessImageAsync(request);
-
-            resultImageStream?.Close();
-            resultRouteStream?.Close();
+            var response = await _imageService.ProcessImageAsync(request);
 
             var viewModel = new ResultDTO
             {
-                OriginalImagePath = _pathManager.OriginalImagePathVM,
-                ResultImagePath = _pathManager.ResultImagePathVM,
-                ResultRoutePath = _pathManager.ResultRouteFilePathVM,
+                OriginalImagePath = response.OriginalImage,
+                ResultImagePath = response.ResultImage,
+                ResultRoutePath = response.ResultRoute,
             };
-
             return Ok(viewModel);
         }
         catch (Exception ex)
@@ -94,15 +72,21 @@ public class ImageController : ControllerBase
         finally
         {
             originalStream?.Dispose();
-            resultImageStream?.Dispose();
-            resultRouteStream?.Dispose();
         }
     }
 
-    [HttpGet("info")]
-    [ProducesResponseType(typeof(string), 200)]
-    public ActionResult<string> GetInfo()
+    [HttpGet("all")]
+    [ProducesResponseType(typeof(IEnumerable<ProcessedResultDto>), 200)]
+    public async Task<ActionResult<IEnumerable<ProcessedResultDto>>> GetRecords()
     {
-        return Ok("API для обработки изображений Thread Art");
+        try
+        {
+            var result = await _imageService.GetRecords();
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Внутренняя ошибка сервера: {ex.Message}");
+        }
     }
 }

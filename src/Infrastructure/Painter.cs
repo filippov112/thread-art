@@ -1,6 +1,5 @@
 ﻿using Application.Interfaces;
 using Domain.Models;
-using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Drawing.Processing;
@@ -24,7 +23,7 @@ namespace Infrastructure
                 {'L', Color.Purple}
             };
 
-        private readonly Font _font = SystemFonts.CreateFont("Arial", 8);
+        //private readonly Font _font = SystemFonts.CreateFont("Arial", 8);
         #endregion
 
         #region API
@@ -81,13 +80,13 @@ namespace Infrastructure
                     new EllipsePolygon(new PointF(sectorPoint.Pixel.X + padding, sectorPoint.Pixel.Y + padding), 3f)
                 ));
 
-                // Текст
-                image.Mutate(ctx => ctx.DrawText(new RichTextOptions(_font)
-                {
-                    Origin = new PointF((sectorPoint.Pixel.X) + 3 + padding, sectorPoint.Pixel.Y + padding), // смещение на 3 пикселя по ширине
-                    HorizontalAlignment = HorizontalAlignment.Left,
-                    VerticalAlignment = VerticalAlignment.Center
-                }, sectorPoint.ToString(), new SolidBrush(color)));
+                //// Текст
+                //image.Mutate(ctx => ctx.DrawText(new RichTextOptions(_font)
+                //{
+                //    Origin = new PointF((sectorPoint.Pixel.X) + 3 + padding, sectorPoint.Pixel.Y + padding), // смещение на 3 пикселя по ширине
+                //    HorizontalAlignment = HorizontalAlignment.Left,
+                //    VerticalAlignment = VerticalAlignment.Center
+                //}, sectorPoint.ToString(), new SolidBrush(color)));
             }
             return image;
         }

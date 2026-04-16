@@ -1,36 +1,32 @@
-public class FileCleanupService : BackgroundService
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+
+namespace Infrastructure.Services;
+
+public class FileCleanupService(ILogger<FileCleanupService> logger, IConfigurationBuilder builder) : BackgroundService
 {
-    private readonly IWebHostEnvironment _env;
-    private readonly ILogger<FileCleanupService> _logger;
-
-    public FileCleanupService(IWebHostEnvironment env, ILogger<FileCleanupService> logger)
-    {
-        _env = env;
-        _logger = logger;
-    }
-
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var builder = new ConfigurationBuilder();
         builder.SetBasePath(Directory.GetCurrentDirectory());
         builder.AddJsonFile("appsettings.json");
         var config = builder.Build().GetSection("Storage");
-
+        var path = Path.Combine(config["StaticFiles"] ?? "wwwroot", config["FolderPath"] ?? "storage");
         while (!stoppingToken.IsCancellationRequested)
         {
-            _logger.LogInformation("Запуск очистки файлов...");
-            CleanupOldFiles(config["FolderPath"] ?? "/storage", float.Parse(config["FileAgeHours"]?.Replace('.', ',') ?? "1"));
-            _logger.LogInformation("Очистка завершена.");
+            logger.LogInformation("Запуск очистки файлов...");
+            CleanupOldFiles(path, float.Parse(config["FileAgeHours"]?.Replace('.', ',') ?? "1"));
+            logger.LogInformation("Очистка завершена.");
             await Task.Delay(TimeSpan.FromHours(double.Parse(config["CleanupIntervalHours"] ?? "1", System.Globalization.CultureInfo.InvariantCulture)), stoppingToken);
         }
     }
 
     private void CleanupOldFiles(string folderPath, float fileAgeHours)
     {
-        string fullPath = Path.Combine(_env.WebRootPath, folderPath);
+        string fullPath = Path.Combine(folderPath);
         if (!Directory.Exists(fullPath))
         {
-            _logger.LogWarning($"Папка {fullPath} не существует.");
+            logger.LogWarning($"Папка {fullPath} не существует.");
             return;
         }
 
@@ -43,11 +39,11 @@ public class FileCleanupService : BackgroundService
                 try
                 {
                     fileInfo.Delete();
-                    _logger.LogInformation($"Удален файл: {file}");
+                    logger.LogInformation($"Удален файл: {file}");
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError($"Ошибка при удалении файла {file}: {ex.Message}");
+                    logger.LogError($"Ошибка при удалении файла {file}: {ex.Message}");
                 }
             }
         }
