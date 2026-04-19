@@ -5,7 +5,9 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
-
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+RUN curl -o wait-for-it.sh https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh \
+    && chmod +x wait-for-it.sh
 RUN mkdir -p /app/wwwroot/storage && \
     chown -R 1000:1000 /app && \
     chown -R 1000:1000 /app/wwwroot && \
@@ -38,4 +40,4 @@ FROM base AS final
 USER 1000
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Web.dll", "--urls", "http://0.0.0.0:8080"]
+ENTRYPOINT ["./wait-for-it.sh", "db:5432", "--timeout=60", "--strict", "--", "dotnet", "Web.dll", "--urls", "http://0.0.0.0:8080"]

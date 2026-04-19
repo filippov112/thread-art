@@ -2,7 +2,7 @@
 using Domain.Enums;
 using Microsoft.AspNetCore.SignalR;
 
-namespace Infrastructure;
+namespace Infrastructure.Services;
 
 public class ProgressLoggerAdapter : IProgressLogger
 {
