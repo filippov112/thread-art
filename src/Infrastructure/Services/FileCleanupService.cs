@@ -1,23 +1,21 @@
-using Microsoft.Extensions.Configuration;
+using Infrastructure.Data;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Services;
 
-public class FileCleanupService(ILogger<FileCleanupService> logger, IConfigurationBuilder builder) : BackgroundService
+public class FileCleanupService(ILogger<FileCleanupService> logger, IOptions<StorageOptions> options) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        builder.SetBasePath(Directory.GetCurrentDirectory());
-        builder.AddJsonFile("appsettings.json");
-        var config = builder.Build().GetSection("Storage");
-        var path = Path.Combine(config["StaticFiles"] ?? "wwwroot", config["FolderPath"] ?? "storage");
+        var path = Path.Combine(options.Value.StaticFiles, options.Value.FolderPath);
         while (!stoppingToken.IsCancellationRequested)
         {
             logger.LogInformation("Запуск очистки файлов...");
-            CleanupOldFiles(path, float.Parse(config["FileAgeHours"]?.Replace('.', ',') ?? "1"));
+            CleanupOldFiles(path, options.Value.FileAgeHours);
             logger.LogInformation("Очистка завершена.");
-            await Task.Delay(TimeSpan.FromHours(double.Parse(config["CleanupIntervalHours"] ?? "1", System.Globalization.CultureInfo.InvariantCulture)), stoppingToken);
+            await Task.Delay(TimeSpan.FromHours(options.Value.CleanupIntervalHours), stoppingToken);
         }
     }
 

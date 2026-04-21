@@ -16,6 +16,9 @@ public static class DependencyInjection
 {
     public static void AddInfrastructureServices(this IHostApplicationBuilder builder)
     {
+        builder.Services.Configure<StorageOptions>(
+            builder.Configuration.GetSection(StorageOptions.SectionName)
+            );
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(connectionString, b => b.MigrationsAssembly("Infrastructure")));

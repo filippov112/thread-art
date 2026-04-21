@@ -8,7 +8,6 @@ public static class DependencyInjection
     public static void AddWebServices(this IHostApplicationBuilder builder)
     {
         builder.Services.AddScoped<IUser, CurrentUser>();
-        builder.Services.AddSingleton<IConfigurationBuilder, ConfigurationBuilder>();
 
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddSignalR();

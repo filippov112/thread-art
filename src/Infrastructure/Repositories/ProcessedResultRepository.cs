@@ -3,31 +3,19 @@ using Application.Repositories;
 using Domain.Models;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Repositories;
 
-public class ProcessedResultRepository : IProcessedResultRepository
+public class ProcessedResultRepository(ApplicationDbContext context, IOptions<StorageOptions> options) : IProcessedResultRepository
 {
-    readonly ApplicationDbContext _context;
-    private readonly string _webPath = "wwwroot";
-    private readonly string _storagePath = "storage";
-    public ProcessedResultRepository(ApplicationDbContext context, IConfigurationBuilder builder)
-    {
-        _context = context;
+    private readonly string _webPath = options.Value.StaticFiles;
+    private readonly string _storagePath = options.Value.FolderPath;
 
-        builder.SetBasePath(Directory.GetCurrentDirectory());
-        builder.AddJsonFile("appsettings.json");
-        var config = builder.Build().GetSection("Storage");
-        if (config["FolderPath"] != null)
-            _storagePath = config["FolderPath"]!;
-        if (config["StaticFiles"] != null)
-            _webPath = config["StaticFiles"]!;
-    }
     public async Task<ProcessedResult> AddAsync(ProcessedResult entity, CancellationToken cancellationToken = default)
     {
-        await _context.ProcessedResults.AddAsync(entity, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
+        await context.ProcessedResults.AddAsync(entity, cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
         return entity;
     }
 
@@ -63,6 +51,6 @@ public class ProcessedResultRepository : IProcessedResultRepository
 
     public async Task<IEnumerable<ProcessedResult>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return await _context.ProcessedResults.ToListAsync(cancellationToken);
+        return await context.ProcessedResults.ToListAsync(cancellationToken);
     }
 }
