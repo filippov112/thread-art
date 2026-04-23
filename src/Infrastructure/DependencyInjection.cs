@@ -32,7 +32,7 @@ public static class DependencyInjection
         builder.Services.AddTransient<IPainter, Painter>();
         builder.Services.AddTransient<IProgressLogger, ProgressLoggerAdapter>();
         builder.Services.AddTransient<IIdentityService, IdentityService>();
-        
+
         // Repositories
         builder.Services.AddScoped<IProcessedResultRepository, ProcessedResultRepository>();
     }

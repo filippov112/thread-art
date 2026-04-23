@@ -34,7 +34,11 @@
         private List<SectorPoint> GetPoints(int n)
         {
             var results = new List<SectorPoint>();
-            int stepPoint = 2 * (Width + Height) / n + 1;
+            if (n == 0 || Width < 3 || Height < 3)
+                return results;
+
+            n = Math.Min(n + 1, 2 * (Width + Height));
+            int stepPoint = 2 * (Width + Height) / n;
 
             // Вычисляем вершины
             for (int i = 1; i * stepPoint < Height; i++)
