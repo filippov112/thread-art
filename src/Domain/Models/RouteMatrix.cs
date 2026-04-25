@@ -37,26 +37,37 @@
             if (n == 0 || Width < 3 || Height < 3)
                 return results;
 
-            n = Math.Min(n + 1, 2 * (Width + Height));
-            int stepPoint = 2 * (Width + Height) / n;
+            n = Math.Min(n, 2 * (Width + Height) - 8); // Не разрешаем число точек большее, чем число пикселей
+            double step = (double)(2 * (Width + Height) - 8) / (n + 1);
 
             // Вычисляем вершины
-            for (int i = 1; i * stepPoint < Height; i++)
+            int counter = 0;
+            for (int j = 1; (int)Math.Round(j * step) < Width - 1 && counter < n; j++) // top
             {
-                results.Add(new(new(0, i * stepPoint, i), Width, Height));
-                results.Add(new(new(Width - 1, i * stepPoint, i), Width, Height));
+                results.Add(new(new((int)Math.Round(j * step), 0, j), Width, Height));
+                counter++;
             }
-            for (int j = 1; j * stepPoint < Width; j++)
+            for (int j = 1; (int)Math.Round(j * step) < Height - 1 && counter < n; j++) // right
             {
-                results.Add(new(new(j * stepPoint, 0, j), Width, Height));
-                results.Add(new(new(j * stepPoint, Height - 1, j), Width, Height));
+                results.Add(new(new(Width - 1, (int)Math.Round(j * step), j), Width, Height));
+                counter++;
+            }
+            for (int j = 1; (int)Math.Round(j * step) < Width - 1 && counter < n; j++) // bottom
+            {
+                results.Add(new(new(Width - 1 - (int)Math.Round(j * step), Height - 1, j), Width, Height));
+                counter++;
+            }
+            for (int j = 1; (int)Math.Round(j * step) < Height - 1 && counter < n; j++) // left
+            {
+                results.Add(new(new(0, Height - 1 - (int)Math.Round(j * step), j), Width, Height));
+                counter++;
             }
             return results;
         }
 
         private void AddPath(SectorPoint start, SectorPoint end)
         {
-            if (start != end && start.Pixel.X != end.Pixel.X && start.Pixel.Y != end.Pixel.Y)
+            if (start.Pixel.X != end.Pixel.X && start.Pixel.Y != end.Pixel.Y)
             {
                 Paths[start].Add(new(start, end));
             }
