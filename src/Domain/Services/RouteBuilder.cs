@@ -16,22 +16,25 @@ public class RouteBuilder(RouteMatrix matrix)
         var start = route.Start;
         for (int step = 0; step < stepCount; step++)
         {
-
             var line = FindNextLine(start, route, originalImage);
-            route.Lines.Add(line);
-            foreach (var p in line.Points)
+            if (line != null)
             {
-                originalImage.Values[p.X, p.Y] += lineContrast;
+                route.Lines.Add(line);
+                foreach (var p in line.Points)
+                {
+                    originalImage.Values[p.X, p.Y] += lineContrast;
+                }
+                start = line.End;
             }
-            start = line.End;
         }
     }
 
-    private Line FindNextLine(SectorPoint start, Route route, PixelMatrix originalImage)
+    private Line? FindNextLine(SectorPoint start, Route route, PixelMatrix originalImage)
     {
         double minValue = double.MaxValue;
-        Line bestPath = matrix.Paths[start].First();
-
+        Line? bestPath = matrix.Paths[start].FirstOrDefault();
+        if (bestPath == null)
+            return bestPath;
         foreach (var path in matrix.Paths[start])
         {
             double sum = 0;

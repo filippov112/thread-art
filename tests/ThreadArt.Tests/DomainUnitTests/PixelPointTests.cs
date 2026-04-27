@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Domain.Models;
+﻿using Domain.Models;
 
 namespace ThreadArt.Tests.DomainUnitTests;
 
@@ -9,8 +6,8 @@ public class PixelPointTests
 {
     [Theory]
     [InlineData(0, 0, 0, 0, true)]
-    [InlineData(1, 10, 1, 10,  true)]
-    [InlineData(1, 10, 0, 0,  false)]
+    [InlineData(1, 10, 1, 10, true)]
+    [InlineData(1, 10, 0, 0, false)]
     [InlineData(101, 100, 101, 100, true)]
     public void PixelPoint_Should_BeEqual(int ax, int ay, int bx, int by, bool expected)
     {
