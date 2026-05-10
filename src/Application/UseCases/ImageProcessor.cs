@@ -12,7 +12,8 @@ namespace Application.UseCases
         IPainter painter,
         IProgressLogger progressLogger,
         IRouteRenderer routeRenderer,
-        IProcessedResultRepository resultRepository)
+        IProcessedResultRepository resultRepository,
+        RouteBuilder routeBuilder)
     {
 
         public async Task<IEnumerable<ProcessedResultDto>> GetRecords(CancellationToken cancellationToken = default)
@@ -41,8 +42,7 @@ namespace Application.UseCases
 
             // Найдем маршрут
             var route = new Route(routeMatrix.Points.First());
-            var routeBuilder = new RouteBuilder(routeMatrix);
-            routeBuilder.FillRoute(route, originalPixelMatrix, request.ContrastLine, request.CountSteps);
+            routeBuilder.FillRoute(routeMatrix, route, originalPixelMatrix, request.ContrastLine, request.CountSteps);
             await progressLogger.SendProgressAsync(Domain.Enums.ProgressStage.Calculated);
 
             // Нанесем маршрут на изображение

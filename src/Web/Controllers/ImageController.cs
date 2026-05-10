@@ -10,15 +10,8 @@ namespace Web.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
-public class ImageController : ControllerBase
+public class ImageController(IServiceScopeFactory scopeFactory) : ControllerBase
 {
-    private readonly ImageProcessor _imageService;
-
-    public ImageController(ImageProcessor imageService, IWebHostEnvironment env)
-    {
-        _imageService = imageService;
-    }
-
     [HttpPost("upload")]
     [ProducesResponseType(typeof(ResultDTO), 200)]
     [ProducesResponseType(400)]
@@ -33,6 +26,8 @@ public class ImageController : ControllerBase
         {
             return BadRequest("Файл изображения не предоставлен.");
         }
+        using var scope = scopeFactory.CreateScope();
+        var imageService = scope.ServiceProvider.GetRequiredService<ImageProcessor>();
 
         // Объявляем поток
         Stream? originalStream = null;
@@ -54,7 +49,7 @@ public class ImageController : ControllerBase
                 CountSteps = countSteps,
                 ContrastLine = contrastLine
             };
-            var response = await _imageService.ProcessImageAsync(request);
+            var response = await imageService.ProcessImageAsync(request);
 
             var viewModel = new ResultDTO
             {
@@ -72,6 +67,7 @@ public class ImageController : ControllerBase
         finally
         {
             originalStream?.Dispose();
+            GC.Collect();
         }
     }
 
@@ -81,7 +77,9 @@ public class ImageController : ControllerBase
     {
         try
         {
-            var result = await _imageService.GetRecords();
+            using var scope = scopeFactory.CreateScope();
+            var imageService = scope.ServiceProvider.GetRequiredService<ImageProcessor>();
+            var result = await imageService.GetRecords();
             return Ok(result);
         }
         catch (Exception ex)

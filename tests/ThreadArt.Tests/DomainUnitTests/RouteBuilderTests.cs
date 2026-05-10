@@ -65,8 +65,8 @@ public class RouteBuilderTests
     private static Route GetRoute(int width, int height, int n, double contrast, int countSteps, RouteMatrix routeMatrix, PixelMatrix originalPixelMatrix)
     {
         var route = new Route(routeMatrix.Points.First());
-        var routeBuilder = new RouteBuilder(routeMatrix);
-        routeBuilder.FillRoute(route, originalPixelMatrix, contrast, countSteps);
+        var routeBuilder = new RouteBuilder();
+        routeBuilder.FillRoute(routeMatrix, route, originalPixelMatrix, contrast, countSteps);
         return route;
     }
 

@@ -19,7 +19,7 @@ namespace Domain.Models
 
         public override int GetHashCode()
         {
-            return $"{X}_{Y}".GetHashCode();
+            return HashCode.Combine(X, Y);
         }
 
         public static bool operator ==(PixelPoint left, PixelPoint right)

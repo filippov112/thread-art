@@ -2,7 +2,7 @@
 
 namespace Domain.Services;
 
-public class RouteBuilder(RouteMatrix matrix)
+public class RouteBuilder
 {
     /// <summary>
     /// Строит маршрут линий
@@ -11,12 +11,12 @@ public class RouteBuilder(RouteMatrix matrix)
     /// <param name="negativeSourceMatrix">Матрица яркости пикселей исходного изображения (в негативе)</param>
     /// <param name="lineContrast">Значение контрастности линий при отрисовке</param>
     /// <returns>Маршрут (последовательный список линий)</returns>
-    public void FillRoute(Route route, PixelMatrix originalImage, double lineContrast, int stepCount)
+    public void FillRoute(RouteMatrix matrix, Route route, PixelMatrix originalImage, double lineContrast, int stepCount)
     {
         var start = route.Start;
         for (int step = 0; step < stepCount; step++)
         {
-            var line = FindNextLine(start, route, originalImage);
+            var line = FindNextLine(matrix, start, route, originalImage);
             if (line != null)
             {
                 route.Lines.Add(line);
@@ -29,7 +29,7 @@ public class RouteBuilder(RouteMatrix matrix)
         }
     }
 
-    private Line? FindNextLine(SectorPoint start, Route route, PixelMatrix originalImage)
+    private Line? FindNextLine(RouteMatrix matrix, SectorPoint start, Route route, PixelMatrix originalImage)
     {
         double minValue = double.MaxValue;
         Line? bestPath = matrix.Paths[start].FirstOrDefault();
