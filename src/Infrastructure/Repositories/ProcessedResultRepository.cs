@@ -12,13 +12,6 @@ public class ProcessedResultRepository(ApplicationDbContext context, IOptions<St
     private readonly string _webPath = options.Value.StaticFiles;
     private readonly string _storagePath = options.Value.FolderPath;
 
-    public async Task<ProcessedResult> AddAsync(ProcessedResult entity, CancellationToken cancellationToken = default)
-    {
-        await context.ProcessedResults.AddAsync(entity, cancellationToken);
-        await context.SaveChangesAsync(cancellationToken);
-        return entity;
-    }
-
     public async Task<SavedRecord> AddProcessedResultAsync(string fileName, Stream originalStream, CancellationToken cancellationToken = default)
     {
         string originalImageName = Guid.NewGuid().ToString() + Path.GetExtension(fileName);
@@ -29,7 +22,7 @@ public class ProcessedResultRepository(ApplicationDbContext context, IOptions<St
         var savedRecord = new SavedRecord(
             File.Create(Path.Combine(_webPath, _storagePath, resultImageName)),
             File.Create(Path.Combine(_webPath, _storagePath, resultRouteFileName)),
-            new ProcessingResponse(
+            new UploadImageDto(
                 "/" + string.Join("/", _storagePath, originalImageName),
                 "/" + string.Join("/", _storagePath, resultImageName),
                 "/" + string.Join("/", _storagePath, resultRouteFileName)
@@ -38,19 +31,21 @@ public class ProcessedResultRepository(ApplicationDbContext context, IOptions<St
         await originalStream.CopyToAsync(File.Create(Path.Combine(_webPath, _storagePath, originalImageName)), cancellationToken);
         originalStream.Position = 0;
 
-        var record = new ProcessedResult()
+        var record = new ImageModel()
         {
             Name = originalImageName,
-            OriginalFilePath = savedRecord.Response.OriginalImage,
-            ResultImagePath = savedRecord.Response.ResultImage,
-            ResultRoutePath = savedRecord.Response.ResultRoute
+            OriginalFilePath = savedRecord.Response.OriginalImagePath,
+            ResultImagePath = savedRecord.Response.ResultImagePath,
+            ResultRoutePath = savedRecord.Response.ResultRoutePath
         };
-        await AddAsync(record, cancellationToken);
+        await context.Images.AddAsync(record, cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
+
         return savedRecord;
     }
 
-    public async Task<IEnumerable<ProcessedResult>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<ImageModel>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return await context.ProcessedResults.ToListAsync(cancellationToken);
+        return await context.Images.ToListAsync(cancellationToken);
     }
 }

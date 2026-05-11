@@ -13,10 +13,10 @@ namespace Web.Controllers;
 public class ImageController(IServiceScopeFactory scopeFactory) : ControllerBase
 {
     [HttpPost("upload")]
-    [ProducesResponseType(typeof(ResultDTO), 200)]
+    [ProducesResponseType(typeof(UploadImageDto), 200)]
     [ProducesResponseType(400)]
     [ProducesResponseType(500)]
-    public async Task<ActionResult<ResultDTO>> UploadImage(
+    public async Task<ActionResult<UploadImageDto>> UploadImage(
         [Required] IFormFile imageFile,
         [Range(1, 2000)] int countPoints = 240,
         [Range(1, 50000)] int countSteps = 4000,
@@ -50,14 +50,7 @@ public class ImageController(IServiceScopeFactory scopeFactory) : ControllerBase
                 ContrastLine = contrastLine
             };
             var response = await imageService.ProcessImageAsync(request);
-
-            var viewModel = new ResultDTO
-            {
-                OriginalImagePath = response.OriginalImage,
-                ResultImagePath = response.ResultImage,
-                ResultRoutePath = response.ResultRoute,
-            };
-            return Ok(viewModel);
+            return Ok(response);
         }
         catch (Exception ex)
         {
@@ -72,8 +65,8 @@ public class ImageController(IServiceScopeFactory scopeFactory) : ControllerBase
     }
 
     [HttpGet("all")]
-    [ProducesResponseType(typeof(IEnumerable<ProcessedResultDto>), 200)]
-    public async Task<ActionResult<IEnumerable<ProcessedResultDto>>> GetRecords()
+    [ProducesResponseType(typeof(IEnumerable<GetRecordsDto>), 200)]
+    public async Task<ActionResult<IEnumerable<GetRecordsDto>>> GetRecords()
     {
         try
         {

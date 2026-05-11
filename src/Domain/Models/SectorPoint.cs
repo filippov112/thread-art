@@ -2,7 +2,7 @@
 
 namespace Domain.Models
 {
-    public struct SectorPoint
+    public readonly struct SectorPoint
     {
         public SectorPoint(PixelPoint pixel, int width, int height)
         {

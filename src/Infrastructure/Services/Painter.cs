@@ -11,22 +11,6 @@ namespace Infrastructure.Services
 {
     public class Painter : IPainter
     {
-        #region Settings
-        // Цвета для разных секторов/сторон
-        private readonly Dictionary<char, Color> _colors = new() {
-                {'A', Color.Red},
-                {'B', Color.Blue},
-                {'C', Color.Green},
-                {'D', Color.Purple},
-                {'T', Color.Red},
-                {'R', Color.Green},
-                {'L', Color.Purple}
-            };
-
-        //private readonly Font _font = SystemFonts.CreateFont("Arial", 8);
-        #endregion
-
-        #region API
         public async Task<PixelData[,]> GetPixelMatrixAsync(Stream originalImageStream)
         {
             using var image = await Image.LoadAsync<Rgba32>(originalImageStream);
@@ -39,31 +23,38 @@ namespace Infrastructure.Services
 
         public async Task SaveImageAsync(Stream resultImageStream, int padding, SectorPoint[] points, double[,] values)
         {
-            using var image = DrawCoordinateGrid(padding, points, values);
+            using Image<Rgba32> image = new(values.GetLength(0), values.GetLength(1));
+            DrawMatrix(image, values);
+            DrawCoordinateGrid(image, padding, points);
             image.Save(resultImageStream, new PngEncoder());
         }
-        #endregion
 
         #region Tools
-        private Image<Rgba32> RestoreImage(double[,] values)
+        private static void DrawMatrix(Image<Rgba32> image, double[,] values)
         {
-            Image<Rgba32> image = new(values.GetLength(0), values.GetLength(1), new Rgba32(255, 255, 255, 255));
-
             for (int x = 0; x < image.Width; x++)
                 for (int y = 0; y < image.Height; y++)
                 {
                     var value = (byte)values[x, y];
                     image[x, y] = new(value, value, value);
                 }
-            return image;
         }
 
-        private Image<Rgba32> DrawCoordinateGrid(int padding, SectorPoint[] points, double[,] values)
+        private static void DrawCoordinateGrid(Image<Rgba32> image, int padding, SectorPoint[] points)
         {
-            var image = RestoreImage(values);
+            //Font _font = SystemFonts.CreateFont("Arial", 8);
+            Dictionary<char, Color> colors = new() {
+                {'A', Color.Red},
+                {'B', Color.Blue},
+                {'C', Color.Green},
+                {'D', Color.Purple},
+                {'T', Color.Red},
+                {'R', Color.Green},
+                {'L', Color.Purple}
+            };
             foreach (SectorPoint sectorPoint in points)
             {
-                var color = _colors.TryGetValue(sectorPoint.Sector, out Color value) ? value : Color.Black;
+                var color = colors.TryGetValue(sectorPoint.Sector, out Color value) ? value : Color.Black;
                 var markerBrush = new SolidBrush(color);
 
                 // Рисуем маркер точки (круг) - исправленная версия
@@ -88,9 +79,7 @@ namespace Infrastructure.Services
                 //    VerticalAlignment = VerticalAlignment.Center
                 //}, sectorPoint.ToString(), new SolidBrush(color)));
             }
-            return image;
         }
-
         #endregion
 
         public void Dispose()

@@ -1,6 +1,6 @@
 ﻿namespace Domain.Models;
 
-public class ProcessedResult
+public class ImageModel
 {
     public int Id { get; set; }
     public required string Name { get; set; }

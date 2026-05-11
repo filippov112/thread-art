@@ -5,15 +5,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data;
 
-public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options)
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-        : base(options) { }
-    public DbSet<ProcessedResult> ProcessedResults { get; set; }
+    public DbSet<ImageModel> Images { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<ProcessedResult>(entity =>
+        modelBuilder.Entity<ImageModel>(entity =>
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.OriginalFilePath).IsRequired().HasMaxLength(500);

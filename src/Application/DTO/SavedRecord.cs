@@ -3,7 +3,7 @@
 public record SavedRecord(
     Stream ResultImage,
     Stream RouteFile,
-    ProcessingResponse Response
+    UploadImageDto Response
 ) : IDisposable
 {
     public void Dispose()

@@ -45,9 +45,10 @@
 
         public bool IsRevert(Line other)
         {
-            if (other.Points.Count == 0 || Points.Count == 0)
-                return false;
-            return other.Points.First() == Points.Last() && other.Points.Last() == Points.First();
+            return other.Points.Count != 0 
+                && Points.Count != 0 
+                && other.Points.First() == Points.Last() 
+                && other.Points.Last() == Points.First();
         }
     }
 }

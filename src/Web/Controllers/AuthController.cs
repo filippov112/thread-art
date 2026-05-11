@@ -8,20 +8,13 @@ namespace Web.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class AuthController : ControllerBase
+public class AuthController(IIdentityService authService) : ControllerBase
 {
-    private readonly IIdentityService _identityService;
-
-    public AuthController(IIdentityService authService)
-    {
-        _identityService = authService;
-    }
-
     [HttpPost("register")]
     [AllowAnonymous]
     public async Task<IActionResult> Register([FromBody] RegisterDto model)
     {
-        var result = await _identityService.RegisterAsync(model);
+        var result = await authService.RegisterAsync(model);
         if (result == null)
             return BadRequest(new { message = "Registration failed. Check email uniqueness or password policy." });
 
@@ -32,11 +25,8 @@ public class AuthController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> Login([FromBody] LoginDto model)
     {
-        var result = await _identityService.LoginAsync(model);
-        if (result == null)
-            return Unauthorized(new { message = "Invalid credentials." });
-
-        return Ok(result);
+        var result = await authService.LoginAsync(model);
+        return result == null ? Unauthorized(new { message = "Invalid credentials." }) : Ok(result);
     }
 
     [HttpGet("profile")]

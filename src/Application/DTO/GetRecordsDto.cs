@@ -1,6 +1,6 @@
 ﻿namespace Application.DTO;
 
-public record ProcessedResultDto(
+public record GetRecordsDto(
     int Id,
     string Name,
     string OriginalFilePath,

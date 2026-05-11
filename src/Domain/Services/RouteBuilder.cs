@@ -11,7 +11,7 @@ public class RouteBuilder
     /// <param name="negativeSourceMatrix">Матрица яркости пикселей исходного изображения (в негативе)</param>
     /// <param name="lineContrast">Значение контрастности линий при отрисовке</param>
     /// <returns>Маршрут (последовательный список линий)</returns>
-    public void FillRoute(RouteMatrix matrix, Route route, PixelMatrix originalImage, double lineContrast, int stepCount)
+    public static void FillRoute(RouteMatrix matrix, Route route, PixelMatrix originalImage, double lineContrast, int stepCount)
     {
         var start = route.Start;
         for (int step = 0; step < stepCount; step++)
@@ -29,7 +29,7 @@ public class RouteBuilder
         }
     }
 
-    private Line? FindNextLine(RouteMatrix matrix, SectorPoint start, Route route, PixelMatrix originalImage)
+    private static Line? FindNextLine(RouteMatrix matrix, SectorPoint start, Route route, PixelMatrix originalImage)
     {
         double minValue = double.MaxValue;
         Line? bestPath = matrix.Paths[start].FirstOrDefault();

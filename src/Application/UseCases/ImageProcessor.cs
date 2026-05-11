@@ -12,16 +12,15 @@ namespace Application.UseCases
         IPainter painter,
         IProgressLogger progressLogger,
         IRouteRenderer routeRenderer,
-        IProcessedResultRepository resultRepository,
-        RouteBuilder routeBuilder)
+        IProcessedResultRepository resultRepository)
     {
 
-        public async Task<IEnumerable<ProcessedResultDto>> GetRecords(CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<GetRecordsDto>> GetRecords(CancellationToken cancellationToken = default)
         {
-            return (await resultRepository.GetAllAsync(cancellationToken)).Select(r => new ProcessedResultDto(r.Id, r.Name, r.OriginalFilePath, r.ResultImagePath, r.ResultRoutePath, r.CreatedAt));
+            return (await resultRepository.GetAllAsync(cancellationToken)).Select(r => new GetRecordsDto(r.Id, r.Name, r.OriginalFilePath, r.ResultImagePath, r.ResultRoutePath, r.CreatedAt));
         }
 
-        public async Task<ProcessingResponse> ProcessImageAsync(ProcessingRequest request, CancellationToken cancellationToken = default)
+        public async Task<UploadImageDto> ProcessImageAsync(ProcessingRequest request, CancellationToken cancellationToken = default)
         {
             // Запрашиваем у сервиса хранения потоки для исходного и результатов
             using SavedRecord record = await resultRepository.AddProcessedResultAsync(
@@ -42,7 +41,7 @@ namespace Application.UseCases
 
             // Найдем маршрут
             var route = new Route(routeMatrix.Points.First());
-            routeBuilder.FillRoute(routeMatrix, route, originalPixelMatrix, request.ContrastLine, request.CountSteps);
+            RouteBuilder.FillRoute(routeMatrix, route, originalPixelMatrix, request.ContrastLine, request.CountSteps);
             await progressLogger.SendProgressAsync(Domain.Enums.ProgressStage.Calculated);
 
             // Нанесем маршрут на изображение

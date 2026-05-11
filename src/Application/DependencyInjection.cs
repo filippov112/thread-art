@@ -12,7 +12,6 @@ public static class DependencyInjection
 {
     public static void AddApplicationServices(this IHostApplicationBuilder builder)
     {
-        builder.Services.AddTransient<RouteBuilder>();
         builder.Services.AddTransient<ImageProcessor>();
         builder.Services.AddTransient<IRouteRenderer, RouteRenderer>();
 
