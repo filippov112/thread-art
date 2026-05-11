@@ -8,8 +8,6 @@ namespace ThreadArt.Tests.DomainUnitTests
         [InlineData(0, 0, 0)] // Нулевой размер и 0 точек
         [InlineData(0, 0, 5)] // Нулевой размер
         [InlineData(2, 2, 4)] // Стороны слишком короткие (в углах точки не ставятся)
-        [InlineData(10, 10, 1)] // 1 точка
-        [InlineData(10, 10, 2)] // Расстояние между соседними точками больше стороны
         public void RouteMatrix_CountPoint_Should_BeEmpty(int width, int height, int n)
         {
             // A

@@ -13,7 +13,7 @@ public class RouteBuilderTests
         var pixelMatrix = GetMatrix(width, height, fillValue);
         var route = GetRoute(contrast, countSteps, routeMatrix, pixelMatrix);
 
-        Assert.Equal(countSteps, route.Lines.Count);
+        Assert.Equal(countSteps + 1, route.Points.Count);
     }
 
     [Theory]

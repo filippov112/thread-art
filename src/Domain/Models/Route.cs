@@ -3,12 +3,11 @@ namespace Domain.Models;
 
 public class Route(SectorPoint start)
 {
-    public readonly SectorPoint Start = start;
-    public readonly List<Line> Lines = [];
+    public readonly List<SectorPoint> Points = [start, ];
 
     public async Task WriteToStreamAsync(Stream routeStream)
     {
-        List<string> steps = [Start.ToString(), .. Lines.Select(l => l.End.ToString())];
+        List<string> steps = [.. Points.Select(p => p.ToString())];
         byte[] buffer = Encoding.UTF8.GetBytes(string.Join('\n', steps));
         await routeStream.WriteAsync(buffer);
     }
