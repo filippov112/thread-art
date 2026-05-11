@@ -20,7 +20,7 @@ public class ImageController(IServiceScopeFactory scopeFactory) : ControllerBase
         [Required] IFormFile imageFile,
         [Range(1, 2000)] int countPoints = 240,
         [Range(1, 50000)] int countSteps = 4000,
-        [Range(0.1, 100.0)] double contrastLine = 15)
+        [Range(0.1, 100.0)] int contrastLine = 15)
     {
         if (imageFile == null || imageFile.Length == 0)
         {

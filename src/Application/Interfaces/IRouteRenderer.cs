@@ -4,5 +4,5 @@ namespace Application.Interfaces;
 
 public interface IRouteRenderer
 {
-    public PixelMatrix RenderRoute(Route route, int padding, int width, int height);
+    public ImageMatrix RenderRoute(Route route, int padding, int width, int height);
 }

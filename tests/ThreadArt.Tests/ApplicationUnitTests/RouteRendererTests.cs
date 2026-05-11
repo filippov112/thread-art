@@ -32,12 +32,12 @@ public class RouteRendererTests
         Assert.True(Math.Abs(min / max - persentDiff / 100) < 0.01);
     }
 
-    private List<double> ConvertMatrixToList(PixelMatrix pixelMatrix)
+    private List<double> ConvertMatrixToList(ImageMatrix pixelMatrix)
     {
         List<double> results = [];
-        for (int i = 0; i < pixelMatrix.Values.GetLength(0) - 1; i++)
-            for (int j = 0; j < pixelMatrix.Values.GetLength(1) - 1; j++)
-                results.Add(pixelMatrix.Values[i, j]);
+        for (int y = 0; y < pixelMatrix.Height - 1; y++)
+            for (int x = 0; x < pixelMatrix.Width - 1; x++)
+                results.Add(pixelMatrix.Pixels[y * pixelMatrix.Width + x]);
         return results;
     }
 }

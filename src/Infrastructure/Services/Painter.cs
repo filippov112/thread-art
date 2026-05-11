@@ -11,31 +11,31 @@ namespace Infrastructure.Services
 {
     public class Painter : IPainter
     {
-        public async Task<PixelData[,]> GetPixelMatrixAsync(Stream originalImageStream)
+        public async Task<ImageMatrix> GetPixelMatrixAsync(Stream originalImageStream)
         {
             using var image = await Image.LoadAsync<Rgba32>(originalImageStream);
-            var matrix = new PixelData[image.Width, image.Height];
-            for (int x = 0; x < image.Width; x++)
-                for (int y = 0; y < image.Height; y++)
-                    matrix[x, y] = new(image[x, y].R, image[x, y].G, image[x, y].B);
+            var matrix = new ImageMatrix(image.Width, image.Height, new int[image.Width * image.Height]);
+            for (int y = 0; y < image.Height; y++)
+                for (int x = 0; x < image.Width; x++)
+                    matrix.Pixels[y * image.Width + x] = (image[x, y].R + image[x, y].G + image[x, y].B) / 3;
             return matrix;
         }
 
-        public async Task SaveImageAsync(Stream resultImageStream, int padding, SectorPoint[] points, double[,] values)
+        public async Task SaveImageAsync(Stream resultImageStream, int padding, SectorPoint[] points, ImageMatrix matrix)
         {
-            using Image<Rgba32> image = new(values.GetLength(0), values.GetLength(1));
-            DrawMatrix(image, values);
+            using Image<Rgba32> image = new(matrix.Width, matrix.Height);
+            DrawMatrix(image, matrix.Pixels);
             DrawCoordinateGrid(image, padding, points);
             image.Save(resultImageStream, new PngEncoder());
         }
 
         #region Tools
-        private static void DrawMatrix(Image<Rgba32> image, double[,] values)
+        private static void DrawMatrix(Image<Rgba32> image, int[] values)
         {
-            for (int x = 0; x < image.Width; x++)
-                for (int y = 0; y < image.Height; y++)
+            for (int y = 0; y < image.Height; y++)
+                for (int x = 0; x < image.Width; x++)
                 {
-                    var value = (byte)values[x, y];
+                    var value = (byte)values[y * image.Width + x];
                     image[x, y] = new(value, value, value);
                 }
         }
@@ -81,10 +81,5 @@ namespace Infrastructure.Services
             }
         }
         #endregion
-
-        public void Dispose()
-        {
-            GC.SuppressFinalize(this);
-        }
     }
 }

@@ -9,7 +9,7 @@ public class RouteRenderer : IRouteRenderer
     private int _height;
     private int _padding;
 
-    public PixelMatrix RenderRoute(Route route, int padding, int width, int height)
+    public ImageMatrix RenderRoute(Route route, int padding, int width, int height)
     {
         _width = width + padding * 2;
         _height = height + padding * 2;
@@ -17,39 +17,39 @@ public class RouteRenderer : IRouteRenderer
         var lineMatrix = FillValues();
         foreach (var line in route.Lines)
             foreach (var point in line.Points)
-                lineMatrix[point.X + padding, point.Y + padding] += 1;
+                lineMatrix[(point.Y + padding) * _width + point.X + padding] += 1;
 
-        (double minValue, double maxValue) = GetMinMaxValues(lineMatrix);
+        (int minValue, int maxValue) = GetMinMaxValues(lineMatrix);
         if (minValue == maxValue)
             minValue--;
         NormalizeValues(lineMatrix, minValue, maxValue);
         return new(_width, _height, lineMatrix);
     }
 
-    private double[,] FillValues()
+    private int[] FillValues()
     {
-        double[,] result = new double[_width, _height];
-        for (int i = 0; i < _width; i++)
-            for (int j = 0; j < _height; j++)
-                result[i, j] = 0;
+        int[] result = new int[_width * _height];
+        for (int y = 0; y < _height; y++)
+            for (int x = 0; x < _width; x++)
+                result[y * _width + x] = 0;
         return result;
     }
-    private (double, double) GetMinMaxValues(double[,] values)
+    private (int, int) GetMinMaxValues(int[] values)
     {
-        double maxValue = 0;
-        double minValue = double.MaxValue;
-        for (int i = _padding; i < _width - _padding; i++)
-            for (int j = _padding; j < _height - _padding; j++)
+        int maxValue = 0;
+        int minValue = int.MaxValue;
+        for (int y = _padding; y < _height - _padding; y++)
+            for (int x = _padding; x < _width - _padding; x++)
             {
-                maxValue = Math.Max(maxValue, values[i, j]);
-                minValue = Math.Min(minValue, values[i, j]);
+                maxValue = Math.Max(maxValue, values[y * _width + x]);
+                minValue = Math.Min(minValue, values[y * _width + x]);
             }
         return (minValue, maxValue);
     }
-    private void NormalizeValues(double[,] values, double minValue, double maxValue)
+    private void NormalizeValues(int[] values, int minValue, int maxValue)
     {
-        for (int i = _padding; i < _width - _padding; i++)
-            for (int j = _padding; j < _height - _padding; j++)
-                values[i, j] = 255 - 255 * (values[i, j] - minValue) / (maxValue - minValue);
+        for (int x = _padding; x < _width - _padding; x++)
+            for (int y = _padding; y < _height - _padding; y++)
+                values[y * _width + x] = 255 - 255 * (values[y * _width + x] - minValue) / (maxValue - minValue);
     }
 }

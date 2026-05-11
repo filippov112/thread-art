@@ -29,26 +29,25 @@ namespace Application.UseCases
                 cancellationToken
             );
 
-            // Получим данные пикселей
-            PixelData[,] data = await painter.GetPixelMatrixAsync(request.OriginalStream);
+            // Получим оригинальную матрицу
+            ImageMatrix originalImage = await painter.GetPixelMatrixAsync(request.OriginalStream);
 
-            // Построим матрицы
-            var originalPixelMatrix = new PixelMatrix(data);
-            var routeMatrix = new RouteMatrix(originalPixelMatrix.Width, originalPixelMatrix.Height, request.CountPoints);
+            // Построим маршруты
+            var routeMatrix = new RouteMatrix(originalImage.Width, originalImage.Height, request.CountPoints);
             await progressLogger.SendProgressAsync(Domain.Enums.ProgressStage.Loaded);
             if (routeMatrix.Points.Length == 0)
                 return record.Response;
 
             // Найдем маршрут
             var route = new Route(routeMatrix.Points.First());
-            RouteBuilder.FillRoute(routeMatrix, route, originalPixelMatrix, request.ContrastLine, request.CountSteps);
+            RouteBuilder.FillRoute(routeMatrix, route, originalImage, request.ContrastLine, request.CountSteps);
             await progressLogger.SendProgressAsync(Domain.Enums.ProgressStage.Calculated);
 
             // Нанесем маршрут на изображение
-            var resultPixelMatrix = routeRenderer.RenderRoute(route, request.Padding, originalPixelMatrix.Width, originalPixelMatrix.Height);
+            var resultImage = routeRenderer.RenderRoute(route, request.Padding, originalImage.Width, originalImage.Height);
 
             // Запишем данные в результирующие потоки
-            await painter.SaveImageAsync(record.ResultImage, request.Padding, routeMatrix.Points, resultPixelMatrix.Values);
+            await painter.SaveImageAsync(record.ResultImage, request.Padding, routeMatrix.Points, resultImage);
             await route.WriteToStreamAsync(record.RouteFile);
             await progressLogger.SendProgressAsync(Domain.Enums.ProgressStage.Saved);
 

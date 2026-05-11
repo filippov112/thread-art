@@ -7,75 +7,62 @@ public class RouteBuilderTests
 {
     [Theory]
     [InlineData(5, 5, 12, 0.15, 3, 1)]
-    public void RouteBuilder_StepCount(int width, int height, int n, double contrast, int countSteps, byte fillValue)
+    public void RouteBuilder_StepCount(int width, int height, int n, int contrast, int countSteps, int fillValue)
     {
         var routeMatrix = new RouteMatrix(width, height, n);
         var pixelMatrix = GetMatrix(width, height, fillValue);
-        var route = GetRoute(width, height, n, contrast, countSteps, routeMatrix, pixelMatrix);
+        var route = GetRoute(contrast, countSteps, routeMatrix, pixelMatrix);
 
         Assert.Equal(countSteps, route.Lines.Count);
     }
 
     [Theory]
-    [InlineData(40, 50, 12, 0.15, 3, 5, 1, 1.2)] // Цель поднять значение 1 за 3 хода по 0,15 (по факту за 2, т.к. возвращаться нельзя) до >1,2
-    [InlineData(20, 20, 12, 0.15, 5, 5, 1, 1.4)] // Цель поднять значение 1 за 5 хода по 0,15 (по факту за 3, т.к. возвращаться нельзя) до >1,4
-    public void RouteBuilder_SelectingPath(int width, int height, int n, double contrast, int countSteps, byte fillValue, byte minValue, byte biggerThan)
+    [InlineData(40, 50, 36, 7, 1, 500, 100, 106)] // Цель поднять значение 100 за 3 хода по 7 (по факту за 2, т.к. возвращаться нельзя) до >106
+    [InlineData(20, 20, 24, 7, 3, 500, 100, 112)] // Цель поднять значение 100 за 5 хода по 7 (по факту за 3, т.к. возвращаться нельзя) до >112
+    public void RouteBuilder_SelectingPath(int width, int height, int n, int contrast, int countSteps, int fillValue, int minValue, int biggerThan)
     {
         var routeMatrix = new RouteMatrix(width, height, n);
         var pixelMatrix = GetMatrix(width, height, fillValue);
-        pixelMatrix.Values[7, 10] = minValue; // Выбираем случайную точку матрицы (7:10)
-        GetRoute(width, height, n, contrast, countSteps, routeMatrix, pixelMatrix);
+        pixelMatrix.Pixels[10 * width + 7] = minValue; // Выбираем случайную точку матрицы (7:10)
+        GetRoute(contrast, countSteps, routeMatrix, pixelMatrix);
 
-        List<double> results = ConvertMatrixToList(pixelMatrix);
 
-        var min = results.Min();
+        var min = pixelMatrix.Pixels.Min();
         Assert.True(min > biggerThan);
         Assert.True(min < fillValue);
     }
 
     [Theory]
-    [InlineData(40, 50, 60, 0.04, 300, 5, 1)]
-    [InlineData(20, 20, 40, 0.04, 500, 5, 1)]
-    [InlineData(200, 200, 200, 0.04, 500, 5, 1)]
-    public void RouteBuilder_DecreaseMinMaxDifference(int width, int height, int n, double contrast, int countSteps, byte fillValue, byte minValue)
+    [InlineData(40, 50, 60, 4, 600, 500, 100)]
+    [InlineData(20, 20, 40, 4, 1000, 500, 100)]
+    [InlineData(200, 200, 200, 4, 1000, 500, 100)]
+    public void RouteBuilder_DecreaseMinMaxDifference(int width, int height, int n, int contrast, int countSteps, int fillValue, int minValue)
     {
         var routeMatrix = new RouteMatrix(width, height, n);
         var pixelMatrix = GetMatrix(width, height, fillValue);
-        pixelMatrix.Values[7, 10] = minValue; // Выбираем случайную точку матрицы (7:10)
-        GetRoute(width, height, n, contrast, countSteps, routeMatrix, pixelMatrix);
+        pixelMatrix.Pixels[10 * width + 7] = minValue; // Выбираем случайную точку матрицы (7:10)
+        GetRoute(contrast, countSteps, routeMatrix, pixelMatrix);
 
-        List<double> results = ConvertMatrixToList(pixelMatrix);
-
-        var min = results.Min();
-        var max = results.Max();
+        var min = pixelMatrix.Pixels.Min();
+        var max = pixelMatrix.Pixels.Max();
         Assert.True(max - min < fillValue - minValue);
     }
 
-    private static PixelMatrix GetMatrix(int width, int height, byte fillValue)
+    private static ImageMatrix GetMatrix(int width, int height, int fillValue)
     {
-        PixelData[,] data = new PixelData[width, height];
-        for (int i = 0; i < width; i++)
-            for (int j = 0; j < height; j++)
+        int[] data = new int[width * height];
+        for (int y = 0; y < height; y++)
+            for (int x = 0; x < width; x++)
             {
-                data[i, j] = new PixelData(fillValue, fillValue, fillValue);
+                data[y * width + x] = fillValue;
             }
-        return new PixelMatrix(data);
+        return new (width, height, data);
     }
 
-    private static Route GetRoute(int width, int height, int n, double contrast, int countSteps, RouteMatrix routeMatrix, PixelMatrix originalPixelMatrix)
+    private static Route GetRoute(int contrast, int countSteps, RouteMatrix routeMatrix, ImageMatrix originalPixelMatrix)
     {
         var route = new Route(routeMatrix.Points.First());
-        var routeBuilder = new RouteBuilder();
         RouteBuilder.FillRoute(routeMatrix, route, originalPixelMatrix, contrast, countSteps);
         return route;
-    }
-
-    private List<double> ConvertMatrixToList(PixelMatrix pixelMatrix)
-    {
-        List<double> results = [];
-        for (int i = 0; i < pixelMatrix.Values.GetLength(0) - 1; i++)
-            for (int j = 0; j < pixelMatrix.Values.GetLength(1) - 1; j++)
-                results.Add(pixelMatrix.Values[i, j]);
-        return results;
     }
 }

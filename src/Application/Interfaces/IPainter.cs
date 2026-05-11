@@ -2,9 +2,9 @@
 
 namespace Application.Interfaces
 {
-    public interface IPainter : IDisposable
+    public interface IPainter 
     {
-        public Task<PixelData[,]> GetPixelMatrixAsync(Stream originalImageStream);
-        public Task SaveImageAsync(Stream resultImageStream, int padding, SectorPoint[] points, double[,] values);
+        public Task<ImageMatrix> GetPixelMatrixAsync(Stream originalImageStream);
+        public Task SaveImageAsync(Stream resultImageStream, int padding, SectorPoint[] points, ImageMatrix image);
     }
 }
