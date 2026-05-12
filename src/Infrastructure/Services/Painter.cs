@@ -1,36 +1,15 @@
-﻿using Application.Interfaces;
-using Domain.Models;
+﻿using Domain.Models;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Drawing.Processing;
-using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 
 namespace Infrastructure.Services
 {
-    public class Painter : IPainter
+    public class Painter
     {
-        public async Task<ImageMatrix> GetPixelMatrixAsync(Stream originalImageStream)
-        {
-            using var image = await Image.LoadAsync<Rgba32>(originalImageStream);
-            var matrix = new ImageMatrix(image.Width, image.Height, new int[image.Width * image.Height]);
-            for (int y = 0; y < image.Height; y++)
-                for (int x = 0; x < image.Width; x++)
-                    matrix.Pixels[y * image.Width + x] = (image[x, y].R + image[x, y].G + image[x, y].B) / 3;
-            return matrix;
-        }
-
-        public async Task SaveImageAsync(Stream resultImageStream, int padding, SectorPoint[] points, ImageMatrix matrix)
-        {
-            using Image<Rgba32> image = new(matrix.Width, matrix.Height);
-            DrawMatrix(image, matrix.Pixels);
-            DrawCoordinateGrid(image, padding, points);
-            image.Save(resultImageStream, new PngEncoder());
-        }
-
-        #region Tools
-        private static void DrawMatrix(Image<Rgba32> image, int[] values)
+        public static void DrawMatrix(Image<Rgba32> image, int[] values)
         {
             for (int y = 0; y < image.Height; y++)
                 for (int x = 0; x < image.Width; x++)
@@ -40,7 +19,7 @@ namespace Infrastructure.Services
                 }
         }
 
-        private static void DrawCoordinateGrid(Image<Rgba32> image, int padding, SectorPoint[] points)
+        public static void DrawCoordinateGrid(Image<Rgba32> image, int padding, SectorPoint[] points)
         {
             //Font _font = SystemFonts.CreateFont("Arial", 8);
             Dictionary<char, Color> colors = new() {
@@ -80,6 +59,5 @@ namespace Infrastructure.Services
                 //}, sectorPoint.ToString(), new SolidBrush(color)));
             }
         }
-        #endregion
     }
 }

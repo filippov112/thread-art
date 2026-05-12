@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260511195714_UsersManagement")]
-    partial class UsersManagement
+    [Migration("20260512174559_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -58,6 +58,58 @@ namespace Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Images");
+                });
+
+            modelBuilder.Entity("Domain.Models.ProcessingJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ContrastLine")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CountPoints")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CountSteps")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasColumnType("text");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("OriginalFilePath")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Padding")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Progress")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ResultImagePath")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ResultRoutePath")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Jobs");
                 });
 
             modelBuilder.Entity("Infrastructure.Identity.ApplicationUser", b =>

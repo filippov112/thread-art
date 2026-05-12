@@ -28,12 +28,13 @@ public static class DependencyInjection
             .AddDefaultTokenProviders();
 
         // Services
+        builder.Services.AddSingleton<IJobQueue, MemoryJobQueue>();
+        builder.Services.AddHostedService<JobProcessorWorker>();
         builder.Services.AddHostedService<FileCleanupService>();
-        builder.Services.AddTransient<IPainter, Painter>();
-        builder.Services.AddTransient<IProgressLogger, ProgressLoggerAdapter>();
         builder.Services.AddTransient<IIdentityService, IdentityService>();
+        builder.Services.AddTransient<IFileSystemService, FileSystemService>();
 
         // Repositories
-        builder.Services.AddScoped<IProcessedResultRepository, ProcessedResultRepository>();
+        builder.Services.AddScoped<IImageModelRepository, ImageModelRepository>();
     }
 }

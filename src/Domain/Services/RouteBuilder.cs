@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using Domain.Models;
+﻿using Domain.Models;
 
 namespace Domain.Services;
 
@@ -12,12 +11,12 @@ public class RouteBuilder
     /// <param name="negativeSourceMatrix">Матрица яркости пикселей исходного изображения (в негативе)</param>
     /// <param name="lineContrast">Значение контрастности линий при отрисовке</param>
     /// <returns>Маршрут (последовательный список линий)</returns>
-    public static void FillRoute(RouteMatrix matrix, Route route, ImageMatrix originalImage, int lineContrast, int stepCount)
+    public static void FillRoute(SectorPoint[] points, Route route, ImageMatrix originalImage, int lineContrast, int stepCount)
     {
         var start = route.Points.First();
         for (int step = 0; step < stepCount; step++)
         {
-            var point = FindNextPoint(matrix, start, route, originalImage, lineContrast);
+            var point = FindNextPoint(points, start, route, originalImage, lineContrast);
             if (point == null)
                 continue;
             start = (SectorPoint)point;
@@ -25,10 +24,10 @@ public class RouteBuilder
         }
     }
 
-    private static SectorPoint? FindNextPoint(RouteMatrix matrix, SectorPoint start, Route route, ImageMatrix originalImage, int lineContrast)
+    private static SectorPoint? FindNextPoint(SectorPoint[] points, SectorPoint start, Route route, ImageMatrix originalImage, int lineContrast)
     {
         double minValue = int.MaxValue;
-        var ends = matrix.GetLineEndPoints(start);
+        var ends = GetLineEndPoints(points, start);
         SectorPoint? bestEndPoint = ends.FirstOrDefault();
         if (bestEndPoint == null)
             return null;
@@ -36,7 +35,7 @@ public class RouteBuilder
         {
             double sum = 0;
             int count = 0;
-            foreach (var p in Line.GetLineIterator(start.Pixel, end.Pixel))
+            foreach (var p in LineConstructor.GetLineIterator(start.Pixel, end.Pixel))
             {
                 sum += originalImage.Pixels[p.Y * originalImage.Width + p.X];
                 count++;
@@ -55,11 +54,20 @@ public class RouteBuilder
                 }
             }
         }
-        foreach (var p in Line.GetLineIterator(start.Pixel, ((SectorPoint)bestEndPoint).Pixel))
+        foreach (var p in LineConstructor.GetLineIterator(start.Pixel, ((SectorPoint)bestEndPoint).Pixel))
         {
             originalImage.Pixels[p.Y * originalImage.Width + p.X] += lineContrast;
         }
         return bestEndPoint;
+    }
+
+    private static List<SectorPoint> GetLineEndPoints(SectorPoint[] all, SectorPoint start)
+    {
+        List<SectorPoint> points = [];
+        foreach (var point in all)
+            if (start.Pixel.X != point.Pixel.X && start.Pixel.Y != point.Pixel.Y)
+                points.Add(point);
+        return points;
     }
 
 }

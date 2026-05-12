@@ -1,6 +1,6 @@
 ﻿namespace Domain.Models
 {
-    public class Line()
+    public class LineConstructor
     {
         /// <summary>
         /// Вычисляет координаты точек матрицы, лежащие на прямой линии между двумя точками на её краях

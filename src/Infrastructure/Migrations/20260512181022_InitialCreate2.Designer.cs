@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260419094056_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260512181022_InitialCreate2")]
+    partial class InitialCreate2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,7 @@ namespace Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Domain.Models.ProcessedResult", b =>
+            modelBuilder.Entity("Domain.Models.ImageModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -57,7 +57,63 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ProcessedResults");
+                    b.ToTable("Images");
+                });
+
+            modelBuilder.Entity("Domain.Models.ProcessingJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ContrastLine")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CountPoints")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CountSteps")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasColumnType("text");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("OriginalSystemPath")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("OriginalWebPath")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Padding")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Progress")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ResultImagePath")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ResultRoutePath")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Jobs");
                 });
 
             modelBuilder.Entity("Infrastructure.Identity.ApplicationUser", b =>

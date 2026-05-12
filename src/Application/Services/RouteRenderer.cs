@@ -16,7 +16,7 @@ public class RouteRenderer : IRouteRenderer
         _padding = padding;
         var lineMatrix = FillValues();
         for (int i = 0; i < route.Points.Count - 1; i++)
-            foreach(var pixel in Line.GetLineIterator(route.Points[i].Pixel, route.Points[i+1].Pixel))
+            foreach (var pixel in LineConstructor.GetLineIterator(route.Points[i].Pixel, route.Points[i + 1].Pixel))
                 lineMatrix[(pixel.Y + padding) * _width + pixel.X + padding] += 1;
 
         (int minValue, int maxValue) = GetMinMaxValues(lineMatrix);

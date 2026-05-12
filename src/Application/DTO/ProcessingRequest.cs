@@ -3,7 +3,8 @@
 public class ProcessingRequest
 {
     public string FileName { get; set; } = string.Empty;
-    public Stream OriginalStream { get; set; } = null!;
+    public string SystemPath { get; set; } = string.Empty;
+    public string WebPath { get; set; } = string.Empty;
     public int CountPoints { get; set; } = 240;
     public int CountSteps { get; set; } = 4000;
     public int ContrastLine { get; set; } = 15;

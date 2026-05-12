@@ -11,10 +11,10 @@ namespace ThreadArt.Tests.DomainUnitTests
         public void RouteMatrix_CountPoint_Should_BeEmpty(int width, int height, int n)
         {
             // A
-            var matrix = new RouteMatrix(width, height, n);
+            var matrix = PointsFinder.GetPoints(width, height, n);
 
             // A
-            Assert.Empty(matrix.Points);
+            Assert.Empty(matrix);
         }
 
         [Theory]
@@ -23,10 +23,10 @@ namespace ThreadArt.Tests.DomainUnitTests
         public void RouteMatrix_CountPoint_Should_BeNotEmpty(int width, int height, int n)
         {
             // A
-            var matrix = new RouteMatrix(width, height, n);
+            var matrix = PointsFinder.GetPoints(width, height, n);
 
             // A
-            Assert.NotEmpty(matrix.Points);
+            Assert.NotEmpty(matrix);
         }
 
         [Theory]
@@ -36,10 +36,10 @@ namespace ThreadArt.Tests.DomainUnitTests
         public void RouteMatrix_CountPoint_Should_BeEqual(int width, int height, int n)
         {
             // A
-            var matrix = new RouteMatrix(width, height, n);
+            var matrix = PointsFinder.GetPoints(width, height, n);
 
             // A
-            Assert.Equal(n, matrix.Points.Length);
+            Assert.Equal(n, matrix.Length);
         }
 
         [Theory]
@@ -51,13 +51,13 @@ namespace ThreadArt.Tests.DomainUnitTests
         public void RouteMatrix_The_aspect_ratio_must_be_maintained(int width, int height, int count)
         {
             // A
-            var matrix = new RouteMatrix(width, height, count);
+            var matrix = PointsFinder.GetPoints(width, height, count);
 
             // A
-            Assert.True(Math.Abs((double)count / 2 * height / (width + height) - matrix.Points.Where(p => p.Sector == 'L').Count()) < 1.5);
-            Assert.True(Math.Abs((double)count / 2 * height / (width + height) - matrix.Points.Where(p => p.Sector == 'R').Count()) < 1.5);
-            Assert.True(Math.Abs((double)count / 2 * width / (width + height) - matrix.Points.Where(p => p.Sector == 'T').Count()) < 1.5);
-            Assert.True(Math.Abs((double)count / 2 * width / (width + height) - matrix.Points.Where(p => p.Sector == 'B').Count()) < 1.5);
+            Assert.True(Math.Abs((double)count / 2 * height / (width + height) - matrix.Where(p => p.Sector == 'L').Count()) < 1.5);
+            Assert.True(Math.Abs((double)count / 2 * height / (width + height) - matrix.Where(p => p.Sector == 'R').Count()) < 1.5);
+            Assert.True(Math.Abs((double)count / 2 * width / (width + height) - matrix.Where(p => p.Sector == 'T').Count()) < 1.5);
+            Assert.True(Math.Abs((double)count / 2 * width / (width + height) - matrix.Where(p => p.Sector == 'B').Count()) < 1.5);
         }
     }
 }

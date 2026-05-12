@@ -9,49 +9,47 @@ using Domain.Services;
 namespace Application.UseCases
 {
     public class ImageProcessor(
-        IPainter painter,
-        IProgressLogger progressLogger,
         IRouteRenderer routeRenderer,
-        IProcessedResultRepository resultRepository)
+        IImageModelRepository repository,
+        IFileSystemService fileSystem)
     {
 
-        public async Task<IEnumerable<GetRecordsDto>> GetRecords(CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<GetRecordsDto>> GetRecords(CancellationToken ct = default)
         {
-            return (await resultRepository.GetAllAsync(cancellationToken)).Select(r => new GetRecordsDto(r.Id, r.Name, r.OriginalFilePath, r.ResultImagePath, r.ResultRoutePath, r.CreatedAt));
+            return (await repository.GetAllAsync(ct)).Select(r => new GetRecordsDto(r.Id, r.Name, r.OriginalFilePath, r.ResultImagePath, r.ResultRoutePath, r.CreatedAt));
         }
 
-        public async Task<UploadImageDto> ProcessImageAsync(ProcessingRequest request, CancellationToken cancellationToken = default)
+        public async Task<UploadImageDto> ProcessImageAsync(ProcessingRequest request, CancellationToken ct = default)
         {
-            // Запрашиваем у сервиса хранения потоки для исходного и результатов
-            using SavedRecord record = await resultRepository.AddProcessedResultAsync(
-                request.FileName,
-                request.OriginalStream,
-                cancellationToken
-            );
-
             // Получим оригинальную матрицу
-            ImageMatrix originalImage = await painter.GetPixelMatrixAsync(request.OriginalStream);
+            ImageMatrix originalImage = await fileSystem.ReadOriginalImageAsync(request.SystemPath, ct);
 
-            // Построим маршруты
-            var routeMatrix = new RouteMatrix(originalImage.Width, originalImage.Height, request.CountPoints);
-            await progressLogger.SendProgressAsync(Domain.Enums.ProgressStage.Loaded);
-            if (routeMatrix.Points.Length == 0)
-                return record.Response;
+            // Найдем координаты вершин
+            var points = PointsFinder.GetPoints(originalImage.Width, originalImage.Height, request.CountPoints);
+            if (points.Length == 0)
+                throw new Exception("Ошибка! Недостаточное количество крайних точек!");
 
-            // Найдем маршрут
-            var route = new Route(routeMatrix.Points.First());
-            RouteBuilder.FillRoute(routeMatrix, route, originalImage, request.ContrastLine, request.CountSteps);
-            await progressLogger.SendProgressAsync(Domain.Enums.ProgressStage.Calculated);
+            // Построим маршрут
+            var route = new Route(points.First());
+            RouteBuilder.FillRoute(points, route, originalImage, request.ContrastLine, request.CountSteps);
 
             // Нанесем маршрут на изображение
             var resultImage = routeRenderer.RenderRoute(route, request.Padding, originalImage.Width, originalImage.Height);
 
-            // Запишем данные в результирующие потоки
-            await painter.SaveImageAsync(record.ResultImage, request.Padding, routeMatrix.Points, resultImage);
-            await route.WriteToStreamAsync(record.RouteFile);
-            await progressLogger.SendProgressAsync(Domain.Enums.ProgressStage.Saved);
+            // Запишем данные на диск
+            (string resultImageSystemPath, string resultImageWebPath) = await fileSystem.SaveResultImageAsync(request.Padding, points, resultImage, ct);
+            (string resultRouteSystemPath, string resultRouteWebPath) = await fileSystem.SaveRouteAsync(route, ct);
 
-            return record.Response;
+            // Сохраним запись в базе
+            await repository.SaveImageModelAsync(new()
+            {
+                Name = request.FileName,
+                OriginalFilePath = request.SystemPath,
+                ResultImagePath = resultImageSystemPath,
+                ResultRoutePath = resultRouteSystemPath
+            }, ct);
+
+            return new(resultImageWebPath, resultRouteWebPath);
         }
     }
 }

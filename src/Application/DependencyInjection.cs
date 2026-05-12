@@ -2,7 +2,6 @@
 using Application.Interfaces;
 using Application.Services;
 using Application.UseCases;
-using Domain.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 

@@ -9,7 +9,7 @@ public class LineTests
     public void LineLegth_Should_BeEqual(int aX, int aY, int bX, int bY, int l)
     {
         // A
-        var line = Line.GetLineIterator(new PixelPoint(aX, aY), new PixelPoint(bX, bY));
+        var line = LineConstructor.GetLineIterator(new PixelPoint(aX, aY), new PixelPoint(bX, bY));
 
         // A
         Assert.Equal(l, line.ToList().Count);

@@ -9,7 +9,7 @@ public class RouteBuilderTests
     [InlineData(5, 5, 12, 0.15, 3, 1)]
     public void RouteBuilder_StepCount(int width, int height, int n, int contrast, int countSteps, int fillValue)
     {
-        var routeMatrix = new RouteMatrix(width, height, n);
+        var routeMatrix = PointsFinder.GetPoints(width, height, n);
         var pixelMatrix = GetMatrix(width, height, fillValue);
         var route = GetRoute(contrast, countSteps, routeMatrix, pixelMatrix);
 
@@ -21,7 +21,7 @@ public class RouteBuilderTests
     [InlineData(20, 20, 24, 7, 3, 500, 100, 112)] // Цель поднять значение 100 за 5 хода по 7 (по факту за 3, т.к. возвращаться нельзя) до >112
     public void RouteBuilder_SelectingPath(int width, int height, int n, int contrast, int countSteps, int fillValue, int minValue, int biggerThan)
     {
-        var routeMatrix = new RouteMatrix(width, height, n);
+        var routeMatrix = PointsFinder.GetPoints(width, height, n);
         var pixelMatrix = GetMatrix(width, height, fillValue);
         pixelMatrix.Pixels[10 * width + 7] = minValue; // Выбираем случайную точку матрицы (7:10)
         GetRoute(contrast, countSteps, routeMatrix, pixelMatrix);
@@ -38,7 +38,7 @@ public class RouteBuilderTests
     [InlineData(200, 200, 200, 4, 1000, 500, 100)]
     public void RouteBuilder_DecreaseMinMaxDifference(int width, int height, int n, int contrast, int countSteps, int fillValue, int minValue)
     {
-        var routeMatrix = new RouteMatrix(width, height, n);
+        var routeMatrix = PointsFinder.GetPoints(width, height, n);
         var pixelMatrix = GetMatrix(width, height, fillValue);
         pixelMatrix.Pixels[10 * width + 7] = minValue; // Выбираем случайную точку матрицы (7:10)
         GetRoute(contrast, countSteps, routeMatrix, pixelMatrix);
@@ -56,12 +56,12 @@ public class RouteBuilderTests
             {
                 data[y * width + x] = fillValue;
             }
-        return new (width, height, data);
+        return new(width, height, data);
     }
 
-    private static Route GetRoute(int contrast, int countSteps, RouteMatrix routeMatrix, ImageMatrix originalPixelMatrix)
+    private static Route GetRoute(int contrast, int countSteps, SectorPoint[] routeMatrix, ImageMatrix originalPixelMatrix)
     {
-        var route = new Route(routeMatrix.Points.First());
+        var route = new Route(routeMatrix.First());
         RouteBuilder.FillRoute(routeMatrix, route, originalPixelMatrix, contrast, countSteps);
         return route;
     }

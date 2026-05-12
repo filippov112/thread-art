@@ -52,7 +52,7 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProcessedResults",
+                name: "Images",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -65,7 +65,31 @@ namespace Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProcessedResults", x => x.Id);
+                    table.PrimaryKey("PK_Images", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Jobs",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    FileName = table.Column<string>(type: "text", nullable: false),
+                    OriginalFilePath = table.Column<string>(type: "text", nullable: false),
+                    CountPoints = table.Column<int>(type: "integer", nullable: false),
+                    CountSteps = table.Column<int>(type: "integer", nullable: false),
+                    ContrastLine = table.Column<int>(type: "integer", nullable: false),
+                    Padding = table.Column<int>(type: "integer", nullable: false),
+                    ResultImagePath = table.Column<string>(type: "text", nullable: true),
+                    ResultRoutePath = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    Progress = table.Column<int>(type: "integer", nullable: false),
+                    ErrorMessage = table.Column<string>(type: "text", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CompletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Jobs", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -231,7 +255,10 @@ namespace Infrastructure.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "ProcessedResults");
+                name: "Images");
+
+            migrationBuilder.DropTable(
+                name: "Jobs");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
