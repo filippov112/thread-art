@@ -27,14 +27,27 @@ public static class DependencyInjection
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
+        // Устанавливаем число паралельных задач
+        var processingConfig = builder.Configuration.GetSection(ProcessingOptions.SectionName).Get<ProcessingOptions>();
+        int maxConcurrency;
+        if (processingConfig != null && processingConfig.MaxConcurrency > 0)
+            maxConcurrency = processingConfig.MaxConcurrency;
+        else
+            maxConcurrency = Math.Max(1, Environment.ProcessorCount - 1); // Авто-расчет: Кол-во ядер минус 1 (оставляем запас для IO/системы)
+
         // Services
         builder.Services.AddSingleton<IJobQueue, MemoryJobQueue>();
-        builder.Services.AddHostedService<JobProcessorWorker>();
+        builder.Services.AddHostedService(sp =>
+        {
+            var queue = sp.GetRequiredService<IJobQueue>();
+            return new JobProcessorWorker(sp, queue, maxConcurrency);
+        });
         builder.Services.AddHostedService<FileCleanupService>();
         builder.Services.AddTransient<IIdentityService, IdentityService>();
         builder.Services.AddTransient<IFileSystemService, FileSystemService>();
 
         // Repositories
         builder.Services.AddScoped<IImageModelRepository, ImageModelRepository>();
+        builder.Services.AddScoped<IProcessingJobRepository, ProcessingJobRepository>();
     }
 }

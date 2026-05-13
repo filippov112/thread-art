@@ -9,7 +9,10 @@ using Microsoft.Extensions.Hosting;
 
 namespace Infrastructure.Services;
 
-public class JobProcessorWorker(IServiceProvider sp, IJobQueue queue, int maxConcurrency = 2) : BackgroundService
+public class JobProcessorWorker(
+    IServiceProvider sp,
+    IJobQueue queue,
+    int maxConcurrency = 2) : BackgroundService
 {
     private readonly SemaphoreSlim _semaphore = new(maxConcurrency, maxConcurrency);
 
@@ -26,7 +29,7 @@ public class JobProcessorWorker(IServiceProvider sp, IJobQueue queue, int maxCon
     private async Task ProcessJobAsync(Guid jobId, CancellationToken ct)
     {
         using var scope = sp.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        using var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var job = await db.Jobs.FirstAsync(j => j.Id == jobId, ct);
         try
         {
@@ -37,12 +40,12 @@ public class JobProcessorWorker(IServiceProvider sp, IJobQueue queue, int maxCon
 
             var request = new ProcessingRequest
             {
+                JobID = jobId,
                 FileName = job.FileName,
                 SystemPath = job.OriginalSystemPath,
                 WebPath = job.OriginalWebPath,
                 CountPoints = job.CountPoints,
-                CountSteps = job.CountSteps,
-                ContrastLine = job.ContrastLine
+                CountSteps = job.CountSteps
             };
 
             var response = await processor.ProcessImageAsync(request, ct);

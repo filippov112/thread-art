@@ -62,7 +62,7 @@ public class RouteBuilderTests
     private static Route GetRoute(int contrast, int countSteps, SectorPoint[] routeMatrix, ImageMatrix originalPixelMatrix)
     {
         var route = new Route(routeMatrix.First());
-        RouteBuilder.FillRoute(routeMatrix, route, originalPixelMatrix, contrast, countSteps);
+        RouteBuilder.FillRoute(routeMatrix.First(), routeMatrix, route, originalPixelMatrix, contrast, countSteps);
         return route;
     }
 }

@@ -38,8 +38,9 @@ public class RouteRenderer : IRouteRenderer
     {
         int maxValue = 0;
         int minValue = int.MaxValue;
-        for (int y = _padding; y < _height - _padding; y++)
-            for (int x = _padding; x < _width - _padding; x++)
+        // Накидываем по 1 пикселю с каждой стороны, чтобы не брать в расчет вершины
+        for (int y = _padding + 1; y < _height - _padding - 1; y++)
+            for (int x = _padding + 1; x < _width - _padding - 1; x++)
             {
                 maxValue = Math.Max(maxValue, values[y * _width + x]);
                 minValue = Math.Min(minValue, values[y * _width + x]);
@@ -50,6 +51,6 @@ public class RouteRenderer : IRouteRenderer
     {
         for (int x = _padding; x < _width - _padding; x++)
             for (int y = _padding; y < _height - _padding; y++)
-                values[y * _width + x] = 255 - 255 * (values[y * _width + x] - minValue) / (maxValue - minValue);
+                values[y * _width + x] = 255 - Math.Clamp(255 * (values[y * _width + x] - minValue) / (maxValue - minValue), 0, 255);
     }
 }

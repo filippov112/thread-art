@@ -10,7 +10,6 @@ public class ProcessingJob
     public required string OriginalWebPath { get; set; }
     public int CountPoints { get; set; } = 240;
     public int CountSteps { get; set; } = 4000;
-    public int ContrastLine { get; set; } = 15;
     public int Padding { get; set; } = 10;
 
     // Results

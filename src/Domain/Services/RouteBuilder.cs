@@ -11,17 +11,18 @@ public class RouteBuilder
     /// <param name="negativeSourceMatrix">Матрица яркости пикселей исходного изображения (в негативе)</param>
     /// <param name="lineContrast">Значение контрастности линий при отрисовке</param>
     /// <returns>Маршрут (последовательный список линий)</returns>
-    public static void FillRoute(SectorPoint[] points, Route route, ImageMatrix originalImage, int lineContrast, int stepCount)
+    public static SectorPoint FillRoute(SectorPoint start, SectorPoint[] points, Route route, ImageMatrix originalImage, int stepCount, int lineContrast)
     {
-        var start = route.Points.First();
+        // start - уже находится в route.Points
         for (int step = 0; step < stepCount; step++)
         {
             var point = FindNextPoint(points, start, route, originalImage, lineContrast);
             if (point == null)
                 continue;
-            start = (SectorPoint)point;
-            route.Points.Add(start);
+            start = (SectorPoint)point; // Обновляем start
+            route.Points.Add(start); // Сохраняем найденную точку в маршрут
         }
+        return start; // Возвращаем последнюю добавленную точку маршрута, с которой начнется следующий batch.
     }
 
     private static SectorPoint? FindNextPoint(SectorPoint[] points, SectorPoint start, Route route, ImageMatrix originalImage, int lineContrast)
@@ -68,6 +69,40 @@ public class RouteBuilder
             if (start.Pixel.X != point.Pixel.X && start.Pixel.Y != point.Pixel.Y)
                 points.Add(point);
         return points;
+    }
+
+    public static int CalculateOptimalContrast(ImageMatrix image, int stepCount)
+    {
+        int width = image.Width;
+        int height = image.Height;
+
+        // 1. Площадь и диагональ
+        double S = width * height;
+        double D = Math.Sqrt(width * width + height * height);
+
+        // 2. Стандартное отклонение (Контраст матрицы)
+        // Вычисляем среднее
+        double sum = 0;
+        foreach (var p in image.Pixels) sum += p;
+        double mean = sum / image.Pixels.Length;
+
+        // Вычисляем дисперсию
+        double varianceSum = 0;
+        foreach (var p in image.Pixels)
+        {
+            double diff = p - mean;
+            varianceSum += diff * diff;
+        }
+        double variance = varianceSum / image.Pixels.Length;
+        double sigma = Math.Sqrt(variance); // Стандартное отклонение
+
+        // 3. Формула
+        // x = 3.2 * (2 * S * sigma) / (N * D)
+        // 3.2 - произвольный коэффициент
+        double rawX = (6.4 * S * sigma) / (stepCount * D);
+
+        // Округляем до целого
+        return (int)Math.Round(rawX);
     }
 
 }

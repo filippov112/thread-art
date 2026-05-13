@@ -22,7 +22,6 @@ public class ImageController(IServiceScopeFactory scopeFactory, IFileSystemServi
         [Required] IFormFile imageFile,
         [Range(1, 2000)] int countPoints = 240,
         [Range(1, 50000)] int countSteps = 4000,
-        [Range(0.1, 100.0)] int contrastLine = 15,
         [Range(1, 300)] int padding = 10
     )
     {
@@ -46,7 +45,6 @@ public class ImageController(IServiceScopeFactory scopeFactory, IFileSystemServi
                 OriginalWebPath = webPath,
                 CountPoints = countPoints,
                 CountSteps = countSteps,
-                ContrastLine = contrastLine,
                 Padding = padding
             };
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
