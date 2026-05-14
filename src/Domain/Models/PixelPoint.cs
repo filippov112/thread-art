@@ -4,34 +4,13 @@ namespace Domain.Models
 {
     public class PixelPoint(int x, int y)
     {
-        public PixelPoint(int x, int y, int number) : this(x, y)
-        {
-            Number = number;
-        }
         public int X { get; } = x;
         public int Y { get; } = y;
-        public int Number { get; }
 
-        public override bool Equals([NotNullWhen(true)] object? obj)
-        {
-            return obj is PixelPoint p && p.X == X && p.Y == Y;
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(X, Y);
-        }
-
-        public static bool operator ==(PixelPoint left, PixelPoint right)
-        {
-            return left.Equals(right);
-        }
-
-        public static bool operator !=(PixelPoint left, PixelPoint right)
-        {
-            return !(left == right);
-        }
-
+        public override bool Equals([NotNullWhen(true)] object? obj) => obj is PixelPoint p && p.GetHashCode() == GetHashCode();
+        public override int GetHashCode() => HashCode.Combine(X, Y);
+        public static bool operator ==(PixelPoint left, PixelPoint right) => left.Equals(right);
+        public static bool operator !=(PixelPoint left, PixelPoint right) => !(left == right);
         public void Deconstruct(out int x, out int y)
         {
             x = X;

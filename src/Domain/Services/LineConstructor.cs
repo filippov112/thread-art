@@ -1,14 +1,16 @@
-﻿namespace Domain.Models
+﻿using Domain.Models;
+
+namespace Domain.Services
 {
     public class LineConstructor
     {
         /// <summary>
         /// Вычисляет координаты точек матрицы, лежащие на прямой линии между двумя точками на её краях
         /// </summary>
-        public static IEnumerable<PixelPoint> GetLineIterator(PixelPoint A, PixelPoint B)
+        public static IEnumerable<PixelPoint> GetLineIterator(PixelPoint a, PixelPoint b)
         {
-            var (x1, y1) = A;
-            var (x2, y2) = B;
+            var (x1, y1) = a;
+            var (x2, y2) = b;
             int dx = Math.Abs(x2 - x1);
             int dy = Math.Abs(y2 - y1);
             int sx = x1 < x2 ? 1 : -1;
@@ -19,10 +21,10 @@
             {
                 if (x1 == x2 && y1 == y2)
                 {
-                    yield return new(x1, y1, B.Number);
+                    yield return new(x1, y1);
                     break;
                 }
-                yield return new(x1, y1, A.Number);
+                yield return new(x1, y1);
                 int e2 = 2 * err;
                 if (e2 > -dy)
                 {

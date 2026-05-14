@@ -9,12 +9,10 @@ using Domain.Services;
 namespace Application.UseCases
 {
     public class ImageProcessor(
-        IRouteRenderer routeRenderer,
         IImageModelRepository imageRepo,
         IProcessingJobRepository jobRepo,
         IFileSystemService fileSystem)
     {
-
         public async Task<IEnumerable<GetRecordsDto>> GetRecords(CancellationToken ct = default)
         {
             return (await imageRepo.GetAllAsync(ct)).Select(r => new GetRecordsDto(r.Id, r.Name, r.OriginalFilePath, r.ResultImagePath, r.ResultRoutePath, r.CreatedAt));
@@ -35,7 +33,7 @@ namespace Application.UseCases
             // Построим маршрут
             var route = new Route(points.First());
             var start = route.Points.First();
-            var contrastLine = RouteBuilder.CalculateOptimalContrast(originalImage, request.CountSteps);
+            var contrastLine = request.ContrastLine == 0 ? RouteBuilder.CalculateOptimalContrast(originalImage, request.CountSteps) : request.ContrastLine;
             if (request.CountSteps < 7) // Цель - раздробить процесс на промежутки ~10% (до 80%)
                 RouteBuilder.FillRoute(start, points, route, originalImage, request.CountSteps, contrastLine);
             else
@@ -52,7 +50,7 @@ namespace Application.UseCases
             }
 
             // Нанесем маршрут на изображение
-            var resultImage = routeRenderer.RenderRoute(route, request.Padding, originalImage.Width, originalImage.Height);
+            var resultImage = RouteRenderer.RenderRoute(route, request.Padding, originalImage.Width, originalImage.Height);
 
             // Запишем данные на диск
             (string resultImageSystemPath, string resultImageWebPath) = await fileSystem.SaveResultImageAsync(request.Padding, points, resultImage, ct);

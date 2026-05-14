@@ -6,7 +6,7 @@ namespace ThreadArt.Tests.DomainUnitTests;
 public class RouteBuilderTests
 {
     [Theory]
-    [InlineData(5, 5, 12, 0.15, 3, 1)]
+    [InlineData(5, 5, 12, 15, 3, 1)]
     public void RouteBuilder_StepCount(int width, int height, int n, int contrast, int countSteps, int fillValue)
     {
         var routeMatrix = PointsFinder.GetPoints(width, height, n);
@@ -62,7 +62,7 @@ public class RouteBuilderTests
     private static Route GetRoute(int contrast, int countSteps, SectorPoint[] routeMatrix, ImageMatrix originalPixelMatrix)
     {
         var route = new Route(routeMatrix.First());
-        RouteBuilder.FillRoute(routeMatrix.First(), routeMatrix, route, originalPixelMatrix, contrast, countSteps);
+        RouteBuilder.FillRoute(routeMatrix.First(), routeMatrix, route, originalPixelMatrix, countSteps, contrast);
         return route;
     }
 }

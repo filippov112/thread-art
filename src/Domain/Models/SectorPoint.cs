@@ -4,8 +4,9 @@ namespace Domain.Models
 {
     public readonly struct SectorPoint
     {
-        public SectorPoint(PixelPoint pixel, int width, int height)
+        public SectorPoint(PixelPoint pixel, int width, int height, int number)
         {
+            Number = number;
             Sector = 'U';
             if (pixel.X == 0)
                 Sector = 'L';
@@ -18,31 +19,14 @@ namespace Domain.Models
             Pixel = pixel;
         }
         public char Sector { get; }
+        public int Number { get; }
         public PixelPoint Pixel { get; }
 
-        public override readonly bool Equals([NotNullWhen(true)] object? obj)
-        {
-            return obj is SectorPoint p && p.Sector == Sector && p.Pixel.Number == Pixel.Number;
-        }
-
-        public override readonly int GetHashCode()
-        {
-            return $"{Sector}_{Pixel.Number}".GetHashCode();
-        }
-
-        public static bool operator ==(SectorPoint left, SectorPoint right)
-        {
-            return left.Equals(right);
-        }
-
-        public static bool operator !=(SectorPoint left, SectorPoint right)
-        {
-            return !(left == right);
-        }
-
-        public override readonly string ToString()
-        {
-            return $"{Sector}{Pixel.Number}";
-        }
+        public override readonly bool Equals([NotNullWhen(true)] object? obj) => obj is SectorPoint p && p.GetHashCode() == GetHashCode();
+        public override readonly int GetHashCode() => HashCode.Combine(Sector, Number);
+        public static bool operator ==(SectorPoint left, SectorPoint right) => left.Equals(right);
+        public static bool operator !=(SectorPoint left, SectorPoint right) => !(left == right);
+        public override readonly string ToString() => $"{Sector}{Number}";
+        
     }
 }

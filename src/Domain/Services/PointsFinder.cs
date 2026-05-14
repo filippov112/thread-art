@@ -1,8 +1,9 @@
-﻿namespace Domain.Models
+﻿using Domain.Models;
+
+namespace Domain.Services
 {
     public class PointsFinder
     {
-
         public static SectorPoint[] GetPoints(int width, int height, int n)
         {
             if (n < 2 || width < 3 || height < 3)
@@ -16,19 +17,19 @@
             int counterT = 0;
             for (int j = 1; j < width - 1; j++) // top
                 if (selectedPoints.Contains(new(j, 0)))
-                    results[counterT++] = new(new(j, 0, counterT + 1), width, height);
+                    results[counterT++] = new(new(j, 0), width, height, counterT + 1);
             int counterR = 0;
             for (int j = 1; j < height - 1; j++) // right
                 if (selectedPoints.Contains(new(width - 1, j)))
-                    results[counterT + counterR++] = new(new(width - 1, j, counterR + 1), width, height);
+                    results[counterT + counterR++] = new(new(width - 1, j), width, height, counterR + 1);
             int counterB = 0;
             for (int j = 1; j < width - 1; j++) // bottom
                 if (selectedPoints.Contains(new(width - 1 - j, height - 1)))
-                    results[counterT + counterR + counterB++] = new(new(width - 1 - j, height - 1, counterB + 1), width, height);
+                    results[counterT + counterR + counterB++] = new(new(width - 1 - j, height - 1), width, height, counterB + 1);
             int counterL = 0;
             for (int j = 1; j < height - 1; j++) // left
                 if (selectedPoints.Contains(new(0, height - 1 - j)))
-                    results[counterT + counterR + counterB + counterL++] = new(new(0, height - 1 - j, counterL + 1), width, height);
+                    results[counterT + counterR + counterB + counterL++] = new(new(0, height - 1 - j), width, height, counterL + 1);
             return results;
         }
 

@@ -1,5 +1,5 @@
-﻿using Application.Services;
-using Domain.Models;
+﻿using Domain.Models;
+using Domain.Services;
 
 namespace ThreadArt.Tests.ApplicationUnitTests;
 
@@ -9,9 +9,9 @@ public class RouteRendererTests
     [InlineData(1000, 9000, 5)]
     public void RouteRenderer_Normalization(double overlaysCountDiff, int overlaysCount, double persentDiff)
     {
-        var p1 = new SectorPoint(new PixelPoint(1, 0), 5, 5);
-        var p2 = new SectorPoint(new PixelPoint(0, 4), 5, 5);
-        var p3 = new SectorPoint(new PixelPoint(0, 3), 5, 5);
+        var p1 = new SectorPoint(new PixelPoint(1, 0), 5, 5, 1);
+        var p2 = new SectorPoint(new PixelPoint(0, 4), 5, 5, 2);
+        var p3 = new SectorPoint(new PixelPoint(0, 3), 5, 5, 3);
 
         Route route = new(p1);
         for (int i = 0; i < overlaysCount; i++)
@@ -26,7 +26,7 @@ public class RouteRendererTests
         }
 
         var renderer = new RouteRenderer();
-        var matrix = renderer.RenderRoute(route, 0, 5, 5);
+        var matrix = RouteRenderer.RenderRoute(route, 0, 5, 5);
 
         double min = matrix.Pixels.Where(x => x > 0.1).Min();
         double max = matrix.Pixels.Max();

@@ -1,4 +1,5 @@
 ﻿using Domain.Models;
+using Domain.Services;
 
 namespace ThreadArt.Tests.DomainUnitTests;
 

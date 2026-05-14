@@ -9,4 +9,5 @@ public class ProcessingRequest
     public int CountPoints { get; set; } = 240;
     public int CountSteps { get; set; } = 4000;
     public int Padding { get; set; } = 10;
+    public int ContrastLine { get; set; } = 0;
 }
