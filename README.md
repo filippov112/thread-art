@@ -281,7 +281,7 @@ Allows you to pass the current processing status while a long-running operation 
 
 ### API Endpoints
 
-| Method | Endpoint | Description | Auth |
+| Method | Endpoint | Description |
 |--------|-------------|-----------|
 | POST | `/api/image/upload` | Upload an image | Yes |
 | GET | `/api/image/job/{jobId}` | Status of a specific task | Yes |
