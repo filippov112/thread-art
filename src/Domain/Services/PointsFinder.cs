@@ -11,26 +11,26 @@ namespace Domain.Services
 
             n = Math.Min(n, 2 * (width + height) - 8); // Не разрешаем число точек большее, чем число пикселей
             var selectedPoints = FindPoints(width, height, n);
-            var results = new SectorPoint[selectedPoints.Count];
+            List<SectorPoint> results = [];
 
             // Вычисляем вершины
             int counterT = 0;
             for (int j = 1; j < width - 1; j++) // top
                 if (selectedPoints.Contains(new(j, 0)))
-                    results[counterT++] = new(new(j, 0), width, height, counterT + 1);
+                    results.Add(new(new(j, 0), width, height, counterT + 1));
             int counterR = 0;
             for (int j = 1; j < height - 1; j++) // right
                 if (selectedPoints.Contains(new(width - 1, j)))
-                    results[counterT + counterR++] = new(new(width - 1, j), width, height, counterR + 1);
+                    results.Add(new(new(width - 1, j), width, height, counterR + 1));
             int counterB = 0;
             for (int j = 1; j < width - 1; j++) // bottom
                 if (selectedPoints.Contains(new(width - 1 - j, height - 1)))
-                    results[counterT + counterR + counterB++] = new(new(width - 1 - j, height - 1), width, height, counterB + 1);
+                    results.Add(new(new(width - 1 - j, height - 1), width, height, counterB + 1));
             int counterL = 0;
             for (int j = 1; j < height - 1; j++) // left
                 if (selectedPoints.Contains(new(0, height - 1 - j)))
-                    results[counterT + counterR + counterB + counterL++] = new(new(0, height - 1 - j), width, height, counterL + 1);
-            return results;
+                    results.Add(new(new(0, height - 1 - j), width, height, counterL + 1));
+            return [.. results];
         }
 
         /// <summary>
