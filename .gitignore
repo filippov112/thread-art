@@ -493,3 +493,4 @@ src/Web/ClientApp/src/app/web-api-client.ts
 src/Web/ClientApp-React/src/web-api-client.ts
 
 tools/
+.Schiza/
