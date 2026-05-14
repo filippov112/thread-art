@@ -70,6 +70,6 @@ namespace Application.UseCases
             return new(resultImageWebPath, resultRouteWebPath);
         }
 
-     
+
     }
 }

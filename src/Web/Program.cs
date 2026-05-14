@@ -2,7 +2,6 @@
 using Application;
 using Infrastructure;
 using Infrastructure.Data;
-using Infrastructure.Services;
 using Scalar.AspNetCore;
 using Web;
 
@@ -35,6 +34,5 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapHub<ProgressHub>("/progressHub");
 app.MapControllers();
 app.Run();
