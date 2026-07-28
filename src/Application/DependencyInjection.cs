@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Application.UseCases;
+﻿using Application.ImageProcessor.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -9,9 +8,7 @@ public static class DependencyInjection
 {
     public static void AddApplicationServices(this IHostApplicationBuilder builder)
     {
-        builder.Services.AddTransient<ImageProcessor>();
+        builder.Services.AddTransient<ImageProcessingService>();
 
-        builder.Services.AddAutoMapper(cfg =>
-            cfg.AddMaps(Assembly.GetExecutingAssembly()));
     }
 }
