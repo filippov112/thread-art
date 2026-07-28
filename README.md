@@ -4,12 +4,11 @@
 
 ## Project Description
 
-Thread Art is a web application for visualizing images as paths constructed from straight lines between points on the image boundaries.
+Thread Art is a application for visualizing images as paths constructed from straight lines between points on the image boundaries.
 
 ### Key Features:
 * **Path Generation**: Create a sequence of points connected by straight lines
 * **Result Visualization**: Render the processed image with color vertex markers
-* **Data Export**: Save the path in text format for later use
 * **Asynchronous Processing**: Process large images without blocking the main thread
 * **Priority System**: Task Queue with the ability to process multiple files in parallel
 
