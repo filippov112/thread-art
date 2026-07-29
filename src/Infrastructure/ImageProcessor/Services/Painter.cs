@@ -1,4 +1,4 @@
-﻿using Domain.ImageProcessor.Models;
+﻿using Core.ImageProcessor.Models;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing;

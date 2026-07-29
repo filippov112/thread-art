@@ -1,6 +1,7 @@
-﻿using Application.ImageProcessor.Services;
-using Application.QueueManager.Models;
-using Application.QueueManager.Repositories;
+﻿using Core.ImageProcessor.DTO;
+using Core.ImageProcessor.Services;
+using Core.QueueManager.Models;
+using Core.QueueManager.Repositories;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,7 +38,7 @@ public class JobProcessorWorker(
             job.Status = JobStatus.Processing;
             await db.SaveChangesAsync(ct);
 
-            var request = new Application.ImageProcessor.DTO.RequestDto
+            var request = new RequestDto
             {
                 JobID = jobId,
                 FileName = job.FileName,

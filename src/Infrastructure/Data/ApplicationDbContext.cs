@@ -1,9 +1,9 @@
-﻿using Application.QueueManager.Models;
+﻿using Core.QueueManager.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data;
 
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext(DbContextOptions options) : DbContext(options)
 {
     public DbSet<ProcessingJob> Jobs { get; set; }
 

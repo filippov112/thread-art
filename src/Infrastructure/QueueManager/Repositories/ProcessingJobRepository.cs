@@ -1,6 +1,6 @@
-﻿using Application.QueueManager.DTO;
-using Application.QueueManager.Models;
-using Application.QueueManager.Repositories;
+﻿using Core.QueueManager.DTO;
+using Core.QueueManager.Models;
+using Core.QueueManager.Repositories;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 

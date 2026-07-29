@@ -1,5 +1,5 @@
 ﻿using System.Threading.Channels;
-using Application.QueueManager.Repositories;
+using Core.QueueManager.Repositories;
 
 namespace Infrastructure.QueueManager.Repositories;
 

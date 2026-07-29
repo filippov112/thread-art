@@ -1,6 +1,6 @@
 ﻿using System.Text;
-using Application.ImageProcessor.Services;
-using Domain.ImageProcessor.Models;
+using Core.ImageProcessor.Models;
+using Core.ImageProcessor.Services;
 using Infrastructure.ImageProcessor.Settings;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp;

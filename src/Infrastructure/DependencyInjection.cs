@@ -1,5 +1,5 @@
-﻿using Application.ImageProcessor.Services;
-using Application.QueueManager.Repositories;
+﻿using Core.ImageProcessor.Services;
+using Core.QueueManager.Repositories;
 using Infrastructure.Data;
 using Infrastructure.ImageProcessor.Services;
 using Infrastructure.ImageProcessor.Settings;
