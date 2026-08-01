@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Wpf.Services;
 using Wpf.Windows.Main;
+using Wpf.Windows.Projects;
 
 namespace Wpf;
 
@@ -24,9 +25,11 @@ public static class DependencyInjection
         //builder.Services.AddTransient<RecentProjectsVM>();
 
         // Windows
+        builder.Services.AddTransient<ProjectsWindow>();
         builder.Services.AddTransient<MainWindow>();
 
         // ViewModels
+        builder.Services.AddTransient<ProjectsWindowVM>();
         builder.Services.AddTransient<MainWindowVM>();
 
         return builder.Services.BuildServiceProvider();

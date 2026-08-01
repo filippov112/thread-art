@@ -1,0 +1,80 @@
+﻿<Window x:Class="Wpf.Windows.Projects.ProjectsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Wpf.Windows.Projects"
+        mc:Ignorable="d" Height="450" Width="800" WindowStyle="None">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <Grid Background="#FFFDFDFD">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Label Grid.RowSpan="2" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontFamily="Stencil" FontSize="40" Padding="20,5,20,5" Background="#FFFFBD29">Thread Art</Label>
+
+            <Label FontSize="24" Grid.Column="1" Margin="25,0,0,0" FontFamily="Segoe UI Light">Мои проекты</Label>
+
+            <StackPanel Orientation="Horizontal" Margin="25,0,0,0" Grid.Row="1" Grid.Column="1">
+                <Button Command="{Binding CreateProjectCommand}" Margin="5,0,0,10" Padding="5,5,5,5" FontWeight="Bold" FontFamily="Segoe UI Light" FontSize="14">Создать</Button>
+                <Button Command="{Binding OpenProjectCommand}" Margin="10,0,0,10" Padding="5,5,5,5" FontWeight="Bold" IsEnabled="False" FontFamily="Segoe UI Light" FontSize="14">Открыть</Button>
+                <Button Command="{Binding DeleteProjectCommand}" Margin="10,0,0,10" Padding="5,5,5,5" FontWeight="Bold" IsEnabled="False" FontFamily="Segoe UI Light" FontSize="14">Удалить</Button>
+            </StackPanel>
+        </Grid>
+
+        <ListBox Grid.Row="1" ItemsSource="{Binding Selections}" SelectedItem="{Binding SelectedSelection}">
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="{x:Type ListBoxItem}">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                </Style>
+            </ListBox.ItemContainerStyle>
+
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <!-- Проект -->
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- заголовок -->
+                        <Label Content="{Binding Title}" HorizontalAlignment="Left" FontSize="16" Grid.RowSpan="2" VerticalContentAlignment="Center" Margin="20,0,0,0"/>
+
+                        <!-- вершины -->
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Background="#FFF7F7F7">
+                            <Label Foreground="#FF646060" Margin="15,0,0,0">Число вершин:</Label>
+                            <Label Content="{Binding SidePointCount}" Foreground="#FF646060" Margin="0,0,15,0"/>
+                        </StackPanel>
+
+                        <!-- прогресс -->
+                        <StackPanel Grid.Column="2" Grid.Row="1" Orientation="Horizontal" Background="#FFF7F7F7">
+                            <Label Foreground="#FF646060" Margin="15,0,0,0">Прогресс:</Label>
+                            <Label Content="{Binding CurrentStep}" Foreground="#FF646060"/>
+                            <Label Foreground="#FF646060">/</Label>
+                            <Label Content="{Binding StepCount}" Foreground="#FF646060" Margin="0,0,15,0"/>
+                        </StackPanel>
+
+                    </Grid>
+
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+    </Grid>
+</Window>

@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Wpf.Windows.Main;
+using Wpf.Windows.Projects;
 
 namespace Wpf
 {
@@ -20,8 +20,8 @@ namespace Wpf
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
-            var mainWindow = _provider.Services.GetRequiredService<MainWindow>();
-            mainWindow.Show();
+            var projects = _provider.Services.GetRequiredService<ProjectsWindow>();
+            projects.Show();
         }
     }
 
