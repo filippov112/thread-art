@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Wpf.Windows.Projects"
-        mc:Ignorable="d" Height="450" Width="800" WindowStyle="None">
+        mc:Ignorable="d" WindowStyle="None" MinWidth="550" MinHeight="100" Height="400" Width="600">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -27,15 +27,31 @@
 
             <StackPanel Orientation="Horizontal" Margin="25,0,0,0" Grid.Row="1" Grid.Column="1">
                 <Button Command="{Binding CreateProjectCommand}" Margin="5,0,0,10" Padding="5,5,5,5" FontWeight="Bold" FontFamily="Segoe UI Light" FontSize="14">Создать</Button>
-                <Button Command="{Binding OpenProjectCommand}" Margin="10,0,0,10" Padding="5,5,5,5" FontWeight="Bold" IsEnabled="False" FontFamily="Segoe UI Light" FontSize="14">Открыть</Button>
-                <Button Command="{Binding DeleteProjectCommand}" Margin="10,0,0,10" Padding="5,5,5,5" FontWeight="Bold" IsEnabled="False" FontFamily="Segoe UI Light" FontSize="14">Удалить</Button>
+                <Button Command="{Binding OpenProjectCommand}" Margin="10,0,0,10" Padding="5,5,5,5" FontWeight="Bold" FontFamily="Segoe UI Light" FontSize="14">Открыть</Button>
+                <Button Command="{Binding DeleteProjectCommand}" Margin="10,0,0,10" Padding="5,5,5,5" FontWeight="Bold" FontFamily="Segoe UI Light" FontSize="14">Удалить</Button>
             </StackPanel>
         </Grid>
 
-        <ListBox Grid.Row="1" ItemsSource="{Binding Selections}" SelectedItem="{Binding SelectedSelection}">
+        <ListBox Grid.Row="1" AlternationCount="2"  ItemsSource="{Binding Projects}" SelectedItem="{Binding SelectedProject}">
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel />
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+
             <ListBox.ItemContainerStyle>
                 <Style TargetType="{x:Type ListBoxItem}">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    <Setter Property="Background" Value="White" />
+                    <Style.Triggers>
+                        <!-- Триггер срабатывает для четных строк (индекс 1,3,5...) -->
+                        <Trigger Property="ItemsControl.AlternationIndex" Value="1">
+                            <Setter Property="Background" Value="#FFFFF3E2" />
+                        </Trigger>
+                        <Trigger Property="ItemsControl.AlternationIndex" Value="0">
+                            <Setter Property="Background" Value="#FFFFFCE3" />
+                        </Trigger>
+                    </Style.Triggers>
                 </Style>
             </ListBox.ItemContainerStyle>
 
@@ -54,26 +70,17 @@
                         </Grid.ColumnDefinitions>
 
                         <!-- заголовок -->
-                        <Label Content="{Binding Title}" HorizontalAlignment="Left" FontSize="16" Grid.RowSpan="2" VerticalContentAlignment="Center" Margin="20,0,0,0"/>
+                        <Label Content="{Binding Title}" FontSize="16" VerticalContentAlignment="Center" FontWeight="Bold"/>
+                        <Label Content="{Binding FilePath}" HorizontalAlignment="Left" VerticalContentAlignment="Center" VerticalAlignment="Top" Grid.Row="1" FontSize="10"/>
 
-                        <!-- вершины -->
-                        <StackPanel Grid.Column="2" Orientation="Horizontal" Background="#FFF7F7F7">
-                            <Label Foreground="#FF646060" Margin="15,0,0,0">Число вершин:</Label>
-                            <Label Content="{Binding SidePointCount}" Foreground="#FF646060" Margin="0,0,15,0"/>
+                        <StackPanel Orientation="Horizontal" Grid.Column="2">
+                            <Label Content="Последнее открытие:" VerticalContentAlignment="Center" Background="#00000000" Foreground="#FF707070"/>
+                            <Label Content="{Binding LastOpened}" VerticalContentAlignment="Center" Padding="2,5,5,5" Foreground="#FF585858"/>
                         </StackPanel>
-
-                        <!-- прогресс -->
-                        <StackPanel Grid.Column="2" Grid.Row="1" Orientation="Horizontal" Background="#FFF7F7F7">
-                            <Label Foreground="#FF646060" Margin="15,0,0,0">Прогресс:</Label>
-                            <Label Content="{Binding CurrentStep}" Foreground="#FF646060"/>
-                            <Label Foreground="#FF646060">/</Label>
-                            <Label Content="{Binding StepCount}" Foreground="#FF646060" Margin="0,0,15,0"/>
-                        </StackPanel>
-
                     </Grid>
-
                 </DataTemplate>
             </ListBox.ItemTemplate>
+        
         </ListBox>
 
     </Grid>

@@ -1,11 +1,13 @@
 ﻿using Core.ImageProcessor.Services;
 using Core.QueueManager.Repositories;
+using Core.Repositories;
 using Infrastructure.Data;
 using Infrastructure.ImageProcessor.Services;
 using Infrastructure.ImageProcessor.Settings;
 using Infrastructure.QueueManager.Repositories;
 using Infrastructure.QueueManager.Settings;
 using Infrastructure.QueueManager.Workers;
+using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,9 +22,7 @@ public static class DependencyInjection
         builder.Services.Configure<StorageOptions>(builder.Configuration.GetSection(StorageOptions.SectionName));
 
         // DB
-        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-        builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlite(connectionString, b => b.MigrationsAssembly("Infrastructure")));
+        builder.Services.AddDbContext<ApplicationDbContext>();
 
         // Устанавливаем число паралельных задач
         var processingConfig = builder.Configuration.GetSection(ProcessingOptions.SectionName).Get<ProcessingOptions>();
@@ -43,5 +43,6 @@ public static class DependencyInjection
 
         // Repositories
         builder.Services.AddScoped<IProcessingJobRepository, ProcessingJobRepository>();
+        builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
     }
 }

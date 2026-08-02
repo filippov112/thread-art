@@ -1,23 +1,35 @@
-﻿using Core.QueueManager.Models;
+﻿using Core.Models;
+using Core.QueueManager.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data;
 
-public class ApplicationDbContext(DbContextOptions options) : DbContext(options)
+public class ApplicationDbContext: DbContext
 {
     public DbSet<ProcessingJob> Jobs { get; set; }
+    public DbSet<Project> Projects { get; set; }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    public ApplicationDbContext() 
     {
-        modelBuilder.Entity<ProcessingJob>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.OriginalSystemPath).IsRequired().HasMaxLength(500);
-            entity.Property(e => e.ResultImagePath).IsRequired().HasMaxLength(1000);
-            entity.Property(e => e.ResultRoutePath).IsRequired().HasMaxLength(1000);
-            entity.Property(e => e.CreatedAt).IsRequired();
-        });
+        Database.EnsureCreated();
+        Task.Run(InitialiseDatabaseAsync);
+    }
 
-        base.OnModelCreating(modelBuilder);
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.UseSqlite("Data Source=helloapp.db");
+    }
+
+    public async Task InitialiseDatabaseAsync()
+    {
+        try
+        {
+            Database.Migrate();
+            Console.WriteLine("Миграции успешно применены.");
+        }
+        catch (Exception ex)
+        {
+            throw new IOException($"Ошибка при применении миграций: {ex}");
+        }
     }
 }

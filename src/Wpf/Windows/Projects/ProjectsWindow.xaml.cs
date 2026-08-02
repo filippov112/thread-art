@@ -15,6 +15,7 @@ namespace Wpf.Windows.Projects
             DataContext = vm;
 
             MouseLeftButtonDown += ProjectsWindow_MouseLeftButtonDown;
+            _vm.WindowIsClosing += () => this.Close();
         }
 
         private void ProjectsWindow_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
