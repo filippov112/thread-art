@@ -5,8 +5,76 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Wpf.Windows.Main"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="{Binding ProjectName}" Height="750" Width="1200">
     <Grid>
-        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Menu Grid.ColumnSpan="3">
+            <MenuItem Header="Конфигурация">
+                <MenuItem Header="Сохранить текущую" Command="{Binding SaveConfigCommand}"/>
+                <MenuItem Header="Загрузить готовую" Command="{Binding LoadConfigCommand}"/>
+            </MenuItem>
+        </Menu>
+
+        <!-- Левая панель -->
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+
+            <Grid Margin="5,5,5,5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Label Content="Название:" Grid.ColumnSpan="2" Padding="5,5,5,1"/>
+                <TextBox Text="{Binding ProjectName}" Grid.Row="1" Grid.ColumnSpan="2" FontSize="14" FontWeight="Bold" Margin="0,0,0,5"/>
+                <TextBox Text="{Binding ProjectFilePath}" Grid.Row="2" IsEnabled="False"/>
+                <Button Content="Выбрать файл" Command="{Binding SelectFileCommand}" Grid.Row="2" Grid.Column="1"/>
+            </Grid>
+
+            <TabControl Grid.Row="1">
+                <TabItem Header="Сетка">
+                    
+                </TabItem>
+                <TabItem Header="Изображение">
+                    
+                </TabItem>
+                <TabItem Header="Построение">
+
+                </TabItem>
+            </TabControl>
+        </Grid>
+
+        <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Width="5" Background="#FFDEDEDE" Grid.Row="1"/>
+
+        <!-- Правая панель -->
+        <Grid Grid.Row="1" Grid.Column="2">
+            
+        </Grid>
+
+        <StatusBar Grid.Row="2" Grid.ColumnSpan="3">
+            <StatusBarItem>
+                <Label Content="{Binding NameCurrentOperation}"/>
+            </StatusBarItem>
+            <StatusBarItem HorizontalAlignment="Right">
+                <ProgressBar Value="{Binding ProgressCurrentOperation}" Width="150" Height="16"/>
+            </StatusBarItem>
+        </StatusBar>
     </Grid>
 </Window>
